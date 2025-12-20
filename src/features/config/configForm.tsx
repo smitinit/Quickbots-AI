@@ -1,30 +1,39 @@
 "use client";
 
+import { useEffect, useState, useTransition } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useTransition } from "react";
+import { toast } from "sonner";
 
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-
+import SaveTriggerUI from "@/components/SaveTriggerUI";
 import { useBotConfigs, useBotData } from "@/components/bot-context";
+import { useConfigActions } from "@/lib/hooks/use-bot-config";
 import { botConfigSchema } from "@/schema";
 import type { BotConfigType } from "@/types";
-import { useConfigActions } from "@/lib/client/config";
-import SaveTriggerUI from "@/components/SaveTriggerUI";
+import { GenerateButton, GenerateFieldSheet } from "@/features/ai-generation";
+import type { FieldType } from "@/types/ai.types";
+import { usePreviewModal } from "@/contexts/preview-modal-context";
 
 export default function BotConfigForm() {
   const { configs, setConfigs } = useBotConfigs();
   const { updateBotConfig } = useConfigActions();
+  const { setIsAiSheetOpen } = usePreviewModal();
+  const [activeField, setActiveField] = useState<FieldType | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  // Sync sheet state with context to hide chatbot
+  useEffect(() => {
+    setIsAiSheetOpen(sheetOpen);
+  }, [sheetOpen, setIsAiSheetOpen]);
 
   // user's saved configs
   const fetchedConfigs = configs as BotConfigType;
@@ -33,6 +42,18 @@ export default function BotConfigForm() {
     resolver: zodResolver(botConfigSchema) as Resolver<BotConfigType>,
     defaultValues: fetchedConfigs ?? {},
   });
+
+  const handleGenerateClick = (field: FieldType) => {
+    setActiveField(field);
+    setSheetOpen(true);
+  };
+
+  const handleApply = (field: string, value: string | string[]) => {
+    form.setValue(field as keyof BotConfigType, value as string, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
 
   // reset the form on changes and set the latest values and also reset isDirty to latest test
   useEffect(() => {
@@ -122,9 +143,14 @@ export default function BotConfigForm() {
                   name="persona"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel className="text-sm font-medium text-foreground">
-                        Persona *
-                      </FormLabel>
+                      <div className="flex items-center justify-between">
+                        <FormLabel className="text-sm font-medium text-foreground">
+                          Persona *
+                        </FormLabel>
+                        <GenerateButton
+                          onClick={() => handleGenerateClick("persona")}
+                        />
+                      </div>
                       <FormControl>
                         <Textarea
                           placeholder="Describe your bot's personality and character traits..."
@@ -142,9 +168,14 @@ export default function BotConfigForm() {
                   name="botthesis"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel className="text-sm font-medium text-foreground">
-                        Bot Mission & Thesis *
-                      </FormLabel>
+                      <div className="flex items-center justify-between">
+                        <FormLabel className="text-sm font-medium text-foreground">
+                          Bot Mission & Thesis *
+                        </FormLabel>
+                        <GenerateButton
+                          onClick={() => handleGenerateClick("botthesis")}
+                        />
+                      </div>
                       <FormControl>
                         <Textarea
                           placeholder="What's your bot's purpose, goal, or philosophy?"
@@ -176,9 +207,14 @@ export default function BotConfigForm() {
                   name="greetings"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel className="text-sm font-medium text-foreground">
-                        Greetings
-                      </FormLabel>
+                      <div className="flex items-center justify-between">
+                        <FormLabel className="text-sm font-medium text-foreground">
+                          Greetings
+                        </FormLabel>
+                        <GenerateButton
+                          onClick={() => handleGenerateClick("greetings")}
+                        />
+                      </div>
                       <FormControl>
                         <Textarea
                           placeholder="Define how your bot greets users (optional)"
@@ -197,9 +233,16 @@ export default function BotConfigForm() {
                   name="fallback_message"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel className="text-sm font-medium text-foreground">
-                        Fallback Message
-                      </FormLabel>
+                      <div className="flex items-center justify-between">
+                        <FormLabel className="text-sm font-medium text-foreground">
+                          Fallback Message
+                        </FormLabel>
+                        <GenerateButton
+                          onClick={() =>
+                            handleGenerateClick("fallback_message")
+                          }
+                        />
+                      </div>
                       <FormControl>
                         <Textarea
                           placeholder="Message to display when bot cannot respond (optional)"
@@ -235,6 +278,19 @@ export default function BotConfigForm() {
         onSave={() => form.handleSubmit(onSubmit)()}
         phrase="Configuration Settings"
       />
+
+      {activeField && (
+        <GenerateFieldSheet
+          open={sheetOpen}
+          onOpenChange={setSheetOpen}
+          field={activeField}
+          botId={bot.bot_id!}
+          currentValue={
+            form.getValues(activeField as keyof BotConfigType) as string
+          }
+          onApply={(value) => handleApply(activeField, value)}
+        />
+      )}
     </div>
   );
 }

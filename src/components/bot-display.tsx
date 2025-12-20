@@ -57,11 +57,11 @@ export default function BotCard({ bot }: { bot: BotType }) {
         <div className="space-y-2 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
             <Calendar className="h-3.5 w-3.5 opacity-60" />
-            <span>Created: {formatDate(bot.created_at)}</span>
+            <span>Created: {formatDate(bot.created_at!)}</span>
           </div>
           <div className="flex items-center gap-2">
             <Clock className="h-3.5 w-3.5 opacity-60" />
-            <span>Updated: {formatDate(bot.updated_at)}</span>
+            <span>Updated: {formatDate(bot.updated_at!)}</span>
           </div>
         </div>
       </CardContent>

@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-
-import Navbar from "@/components/navbar";
 import { ThemeProvider } from "next-themes";
+
 import { Footer } from "@/components/footer";
-import Script from "next/script";
+import Navbar from "@/components/navbar";
 import { SupabaseProvider } from "@/providers/SupabaseProvider";
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,6 +48,8 @@ export const metadata: Metadata = {
 };
 
 import { PreviewModalProvider } from "@/contexts/preview-modal-context";
+import Script from "next/script";
+
 export default function RootLayout({
   children,
 }: {
@@ -61,15 +62,15 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <Script
-          src="https://unpkg.com/react-scan/dist/auto.global.js"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
         <link
           href="https://fonts.cdnfonts.com/css/getvoip-grotesque"
           rel="stylesheet"
         />
+        <Script
+          src="https://quickbot-ai.smit090305.workers.dev/v1/quickbot.iife.js"
+          data-bot-id="fa876e10-77c6-47ae-a67c-1eeb59a2090f"
+          defer
+        ></Script>
       </head>
       <body className="antialiased">
         <ClerkProvider>
@@ -81,9 +82,8 @@ export default function RootLayout({
                 enableSystem
               >
                 <Navbar />
-                {/* <ConditionalChatbot botId="920d50c0-795a-4f84-97cc-326672dcce38" /> */}
-                {children}
 
+                {children}
                 <Footer />
               </ThemeProvider>
             </PreviewModalProvider>

@@ -1,19 +1,13 @@
 "use client";
 
-import { useBotData } from "@/components/bot-context";
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { useBotActions } from "@/lib/client/bot";
-import { AlertTriangle, Power, PowerOff, Trash2, Trash } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
+import { Trash, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+
+import { Card, CardContent } from "@/components/ui/card";
 import { ConfirmActionDialog } from "../../components/ConfirmDialog";
+import { useBotData } from "@/components/bot-context";
+import { useBotActions } from "@/lib/hooks/use-bot";
 
 export default function DangerSectionPage() {
   const [isPendingDelete, startDeleteTransition] = useTransition();
@@ -35,7 +29,8 @@ export default function DangerSectionPage() {
         toast.success(`Bot ${bot.name} is deleted`);
         // Trigger refetch on bots list page
         if (typeof window !== "undefined") {
-          const refetch = (window as Window & { refetchBots?: () => void }).refetchBots;
+          const refetch = (window as Window & { refetchBots?: () => void })
+            .refetchBots;
           if (refetch) {
             refetch();
           }
@@ -43,18 +38,14 @@ export default function DangerSectionPage() {
         window.location.href = "/bots";
       } else {
         const message = result.message || "Failed to delete bot";
-        const isAuthError = message.toLowerCase().includes("authentication") || 
-                           message.toLowerCase().includes("user authentication");
+        const isAuthError =
+          message.toLowerCase().includes("authentication") ||
+          message.toLowerCase().includes("user authentication");
         toast.error(message, {
           duration: isAuthError ? 8000 : 5000,
         });
       }
     });
-  }
-
-  const [isOnline, setOnline] = useState(false);
-  function handleStatusChange() {
-    setOnline(!isOnline);
   }
 
   function handleDeleteAllBots() {
@@ -65,7 +56,8 @@ export default function DangerSectionPage() {
         toast.success("All bots have been deleted");
         // Trigger refetch on bots list page
         if (typeof window !== "undefined") {
-          const refetch = (window as Window & { refetchBots?: () => void }).refetchBots;
+          const refetch = (window as Window & { refetchBots?: () => void })
+            .refetchBots;
           if (refetch) {
             refetch();
           }
@@ -73,8 +65,9 @@ export default function DangerSectionPage() {
         window.location.href = "/bots";
       } else {
         const message = result.message || "Failed to delete all bots";
-        const isAuthError = message.toLowerCase().includes("authentication") || 
-                           message.toLowerCase().includes("user authentication");
+        const isAuthError =
+          message.toLowerCase().includes("authentication") ||
+          message.toLowerCase().includes("user authentication");
         toast.error(message, {
           duration: isAuthError ? 8000 : 5000,
         });
@@ -92,43 +85,17 @@ export default function DangerSectionPage() {
       </div>
 
       <Card className="border border-border/50 shadow-none">
-        <CardHeader className="pb-6">
-          <CardTitle className="text-destructive flex items-center gap-2.5 text-lg">
-            <AlertTriangle className="h-5 w-5 shrink-0" />
-            Dangerous Actions
-          </CardTitle>
-          <CardDescription className="text-sm">
-            These actions cannot be undone. Please proceed with caution.
-          </CardDescription>
-        </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between p-4 border border-border/40 rounded-lg bg-background/50 hover:bg-background/80 transition-colors duration-200">
             <div className="flex-1">
               <h4 className="font-medium text-foreground text-sm">
-                Change Status
+                Bot Status
               </h4>
               <p className="text-xs text-muted-foreground mt-1">
-                Make status changes to your bots such as pausing or deactivating
-                them.
+                Currently bots are locked and cannot be changed. You can change
+                the status in new version of QuickBots.
               </p>
             </div>
-
-            <ConfirmActionDialog
-              title={isOnline ? "Deactivate Bot" : "Activate Bot"}
-              description="Are you sure you want to change the status of this bot? This might affect active integrations."
-              triggerLabel={isOnline ? "Switch Off" : "Switch On"}
-              icon={
-                isOnline ? (
-                  <PowerOff className="h-4 w-4" />
-                ) : (
-                  <Power className="h-4 w-4" />
-                )
-              }
-              variant={isOnline ? "destructive" : "default"}
-              actionLabel="Yes, Change"
-              onConfirm={handleStatusChange}
-              isDestructive={isOnline}
-            />
           </div>
 
           <div className="flex items-center justify-between p-4 border border-destructive/30 rounded-lg bg-destructive/5 hover:bg-destructive/10 transition-colors duration-200">
@@ -159,7 +126,8 @@ export default function DangerSectionPage() {
                 Delete All Bots
               </h4>
               <p className="text-xs text-muted-foreground mt-1">
-                Permanently delete all your bots and all associated data. This action cannot be undone.
+                Permanently delete all your bots and all associated data. This
+                action cannot be undone.
               </p>
             </div>
             <ConfirmActionDialog

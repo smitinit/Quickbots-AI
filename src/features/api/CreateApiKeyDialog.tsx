@@ -3,35 +3,35 @@
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { apiKeySchema } from "@/schema";
-import type { ApiKeyFormType, ApiKeyRow } from "@/types";
-import { useApiKeyActions } from "@/lib/client/api";
+import { Key, Plus } from "lucide-react";
 import { toast } from "sonner";
-import { useBotApi, useBotData } from "@/components/bot-context";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Key, Plus } from "lucide-react";
-import { TokenRevealDialog } from "./TokenRevealDialog";
 import { Spinner } from "@/components/ui/spinner";
+import { useBotApi, useBotData } from "@/components/bot-context";
+import { useApiKeyActions } from "@/lib/hooks/use-api-key";
+import { apiKeySchema } from "@/schema";
+import type { ApiKeyFormType, ApiKeyRow } from "@/types";
+import { TokenRevealDialog } from "./TokenRevealDialog";
 
 const permissions = [
   {
@@ -182,7 +182,7 @@ export default function CreateApiKeyDialog() {
                                   <input
                                     type="radio"
                                     className="form-radio"
-                                    checked={field.value[0] === item.id}
+                                    checked={field.value?.[0] === item.id}
                                     onChange={() => field.onChange([item.id])}
                                   />
                                 </FormControl>

@@ -5,8 +5,8 @@ import { THEME, POSITION, API_KEY_PERMISSIONS } from "./constants";
    Bot Schema
 --------------------------------------------- */
 export const botSchema = z.object({
-  name: z.string().min(1, "Bot's name is required!"),
-  description: z.string().min(1, "Bot's description is required!"),
+  name: z.string().min(1, "Projects's name is required!"),
+  description: z.string().min(1, "Projects's description is required!"),
 });
 
 /* ---------------------------------------------
@@ -94,7 +94,10 @@ export const BotRuntimeSchema = z.object({
 --------------------------------------------- */
 export const previewSchema = z.object({
   theme: z.enum(THEME),
-  chatbotName: z.string().min(1, "Chatbot name is required"),
+  chatbotName: z
+    .string()
+    .min(1, "Chatbot name is required")
+    .max(10, "Chatbot name cannot be greater than 10 letters."),
   welcomeMessage: z.string().min(1, "Welcome message is required"),
   quickQuestions: z.array(z.string()).max(5, "Maximum 5 quick questions"),
   supportInfo: z.string().nullable(),

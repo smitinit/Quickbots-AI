@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
-import quickbotsIcon from "@/app/assets/quickbots-logo.png";
+import quickbotsIcon from "@/assets/quickbots-logo.png";
 
 interface MenuItem {
   title: string;

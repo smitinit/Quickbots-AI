@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect, useState, useTransition } from "react";
 import { Resolver, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { toast } from "sonner";
 
 import {
   Form,
@@ -15,25 +16,26 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-
+import SaveTriggerUI from "@/components/SaveTriggerUI";
+import { useBotData, useBotSettings } from "@/components/bot-context";
+import { useSettingsActions } from "@/lib/hooks/use-bot-settings";
 import { botSettingsSchema } from "@/schema";
 import type { BotSettingsType } from "@/types";
-import { useTransition } from "react";
-import { toast } from "sonner";
-import { useBotData, useBotSettings } from "@/components/bot-context";
-import { useSettingsActions } from "@/lib/client/settings";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import SaveTriggerUI from "@/components/SaveTriggerUI";
+import { GenerateButton, GenerateFieldSheet } from "@/features/ai-generation";
+import type { FieldType } from "@/types/ai.types";
+import { usePreviewModal } from "@/contexts/preview-modal-context";
 
 export default function BotSettingsForm() {
   const { settings, setSettings } = useBotSettings();
   const { updateBotSettings } = useSettingsActions();
+  const { setIsAiSheetOpen } = usePreviewModal();
+  const [activeField, setActiveField] = useState<FieldType | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  // Sync sheet state with context to hide chatbot
+  useEffect(() => {
+    setIsAiSheetOpen(sheetOpen);
+  }, [sheetOpen, setIsAiSheetOpen]);
 
   // user's saved settings
   const fetchedSettings = settings as BotSettingsType;
@@ -41,12 +43,32 @@ export default function BotSettingsForm() {
   // initialize the form and the validator
   const form = useForm<BotSettingsType>({
     resolver: zodResolver(botSettingsSchema) as Resolver<BotSettingsType>,
-    defaultValues: fetchedSettings,
+    defaultValues: {
+      ...fetchedSettings,
+      supported_languages: ["en"], // Always default to English
+    },
   });
+
+  const handleGenerateClick = (field: FieldType) => {
+    setActiveField(field);
+    setSheetOpen(true);
+  };
+
+  const handleApply = (field: string, value: string | string[]) => {
+    form.setValue(field as keyof BotSettingsType, value as string, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
 
   // reset the form on changes and set the latest values and also reset isDirty to latest test
   useEffect(() => {
-    if (settings) form.reset(settings);
+    if (settings) {
+      form.reset({
+        ...settings,
+        supported_languages: ["en"], // Always set to English
+      });
+    }
   }, [settings, form]);
 
   // form states isDirty -> checks the existing settings with current and isSubmitting -> persisting loader
@@ -77,12 +99,19 @@ export default function BotSettingsForm() {
   // submit function
   function onSubmit(values: BotSettingsType) {
     startUpdateTransition(async () => {
+      // Ensure supported_languages is always set to English
+      const updatedValues: BotSettingsType = {
+        ...values,
+        supported_languages: ["en"] as [string, ...string[]],
+      };
+      
       // db call to update the settings
-      const result = await updateBotSettings(bot.bot_id!, values);
+      const result = await updateBotSettings(bot.bot_id!, updatedValues);
 
       if (!result.ok) {
-        const isAuthError = result.message?.toLowerCase().includes("authentication") || 
-                           result.message?.toLowerCase().includes("user authentication");
+        const isAuthError =
+          result.message?.toLowerCase().includes("authentication") ||
+          result.message?.toLowerCase().includes("user authentication");
         toast.error(result.message, {
           duration: isAuthError ? 8000 : 5000,
         });
@@ -172,9 +201,14 @@ export default function BotSettingsForm() {
                 name="business_description"
                 render={({ field }) => (
                   <FormItem className="space-y-2">
-                    <FormLabel className="text-sm font-medium text-foreground">
-                      Business Description
-                    </FormLabel>
+                    <div className="flex items-center justify-between">
+                      <FormLabel className="text-sm font-medium text-foreground">
+                        Business Description
+                      </FormLabel>
+                      <GenerateButton
+                        onClick={() => handleGenerateClick("business_description")}
+                      />
+                    </div>
                     <FormControl>
                       <Textarea
                         placeholder="Describe your business and what it does..."
@@ -220,7 +254,6 @@ export default function BotSettingsForm() {
                     </FormItem>
                   )}
                 />
-
               </div>
 
               <FormField
@@ -228,9 +261,14 @@ export default function BotSettingsForm() {
                 name="product_description"
                 render={({ field }) => (
                   <FormItem className="space-y-2">
-                    <FormLabel className="text-sm font-medium text-foreground">
-                      Product Description
-                    </FormLabel>
+                    <div className="flex items-center justify-between">
+                      <FormLabel className="text-sm font-medium text-foreground">
+                        Product Description
+                      </FormLabel>
+                      <GenerateButton
+                        onClick={() => handleGenerateClick("product_description")}
+                      />
+                    </div>
                     <FormControl>
                       <Textarea
                         placeholder="Describe your product features and benefits..."
@@ -247,7 +285,6 @@ export default function BotSettingsForm() {
                 )}
               />
             </div>
-
 
             {/* Contact & Configuration Section */}
             <div className="space-y-6 pb-8 border-b border-border">
@@ -308,44 +345,20 @@ export default function BotSettingsForm() {
               <FormField
                 control={form.control}
                 name="supported_languages"
-                render={({ field }) => (
+                render={() => (
                   <FormItem className="space-y-2">
                     <FormLabel className="text-sm font-medium text-foreground">
-                      Supported Languages *
+                      Supported Languages
                     </FormLabel>
                     <FormControl>
-                      <Select
-                        onValueChange={(value) => {
-                          const currentLanguages = field.value || ["en"];
-                          if (currentLanguages.includes(value)) {
-                            field.onChange(
-                              currentLanguages.filter((lang) => lang !== value)
-                            );
-                          } else {
-                            field.onChange([...currentLanguages, value]);
-                          }
-                        }}
-                      >
-                        <SelectTrigger className="h-10 bg-background border-border focus:border-primary focus:ring-1 focus:ring-primary">
-                          <SelectValue placeholder="Select languages" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="en">English</SelectItem>
-                          <SelectItem value="es">Spanish</SelectItem>
-                          <SelectItem value="fr">French</SelectItem>
-                          <SelectItem value="de">German</SelectItem>
-                          <SelectItem value="it">Italian</SelectItem>
-                          <SelectItem value="pt">Portuguese</SelectItem>
-                          <SelectItem value="ja">Japanese</SelectItem>
-                          <SelectItem value="zh">Chinese</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Input
+                        value="English"
+                        disabled
+                        className="h-10 bg-muted border-border cursor-not-allowed"
+                      />
                     </FormControl>
-                    <div className="text-xs text-muted-foreground">
-                      Selected: {field.value?.join(", ") || "None"}
-                    </div>
                     <FormDescription className="text-xs text-muted-foreground">
-                      Languages your bot will support (minimum one required).
+                      Currently only English is supported. Additional languages coming soon.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -374,6 +387,17 @@ export default function BotSettingsForm() {
         onSave={() => form.handleSubmit(onSubmit)()}
         phrase="Runtime Settings"
       />
+
+      {activeField && (
+        <GenerateFieldSheet
+          open={sheetOpen}
+          onOpenChange={setSheetOpen}
+          field={activeField}
+          botId={bot.bot_id!}
+          currentValue={form.getValues(activeField as keyof BotSettingsType) as string}
+          onApply={(value) => handleApply(activeField, value)}
+        />
+      )}
     </div>
   );
 }

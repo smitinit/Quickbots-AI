@@ -21,67 +21,114 @@ export default function SaveTriggerUI({
   phrase = "",
 }: SaveTriggerUIProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     if (isDirty) {
       setIsVisible(true);
-    } else {
-      setIsVisible(false);
+      setShowSuccess(false);
+      return;
     }
-  }, [isDirty]);
+
+    if (!isDirty && isVisible && !isSubmitting && !isPendingUpdate) {
+      setShowSuccess(true);
+
+      // Let success state be visible for a while
+      const successTimer = setTimeout(() => {
+        // Trigger exit animation only
+        setIsVisible(false);
+
+        // Reset internal state AFTER animation finishes
+        const cleanupTimer = setTimeout(() => {
+          setShowSuccess(false);
+        }, 300); // Wait for CSS transition to complete
+
+        return () => clearTimeout(cleanupTimer);
+      }, 2000);
+
+      return () => clearTimeout(successTimer);
+    }
+  }, [isDirty, isVisible, isSubmitting, isPendingUpdate]);
 
   const isLoading = isSubmitting || isPendingUpdate;
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 z-60 transition-all duration-300 ease-out ${
+      className={`fixed bottom-4 sm:bottom-6 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-50 transition-all duration-300 ease-out ${
         isVisible
-          ? "translate-y-0 opacity-100"
-          : "translate-y-full opacity-0 pointer-events-none"
+          ? "translate-y-0 opacity-100 scale-100"
+          : "translate-y-4 opacity-0 scale-95 pointer-events-none"
       }`}
     >
-      {/* Border line at the top */}
-      <div className="h-px bg-linear-to-r from-border via-border to-border" />
+      <div className="relative">
+        {/* Floating card with shadow */}
+        <div className="bg-background border border-border rounded-xl shadow-2xl shadow-black/20 dark:shadow-black/40 overflow-hidden sm:min-w-[400px] max-w-2xl">
+          {/* Top accent line */}
+          <div className="h-1 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500" />
 
-      {/* Main container */}
-      <div className="bg-background/95 backdrop-blur-md border-t border-border px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          {/* Left side - Change detection message */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10">
-              <AlertCircle className="w-4 h-4 text-primary" />
+          {/* Content */}
+          <div className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3 sm:gap-4">
+            {/* Left side - Status message */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              {showSuccess ? (
+                <>
+                  <div className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-green-500/10 shrink-0">
+                    <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <p className="text-xs sm:text-sm font-semibold text-foreground truncate">
+                      Changes saved successfully
+                    </p>
+                    <p className="text-xs text-muted-foreground hidden sm:block">
+                      {phrase} has been updated
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-amber-500/10 animate-pulse shrink-0">
+                    <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <p className="text-xs sm:text-sm font-semibold text-foreground truncate">
+                      Unsaved changes
+                    </p>
+                    <p className="text-xs text-muted-foreground hidden sm:block">
+                      {phrase || "Your changes"} need to be saved
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
-            <div className="flex flex-col">
-              <p className="text-sm font-medium text-foreground">
-                Changes detected in {phrase}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Press save to save your changes
-              </p>
-            </div>
-          </div>
 
-          {/* Right side - Save button */}
-          <Button
-            onClick={onSave}
-            disabled={isLoading}
-            size="sm"
-            className="ml-auto gap-2 px-4 h-9 font-medium"
-          >
-            {isLoading ? (
-              <>
-                {/* <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" /> */}
-                <Spinner />
-                <span>Saving...</span>
-              </>
-            ) : (
-              <>
-                <Check className="w-4 h-4" />
-                <span>Save Changes</span>
-              </>
+            {/* Right side - Action buttons */}
+            {!showSuccess && (
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  onClick={onSave}
+                  disabled={isLoading}
+                  size="sm"
+                  className="gap-1.5 sm:gap-2 px-3 sm:px-4 h-8 sm:h-9 font-medium bg-primary hover:bg-primary/90 shadow-sm text-xs sm:text-sm"
+                >
+                  {isLoading ? (
+                    <>
+                      <Spinner />
+                      <span className="hidden xs:inline">Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <span>Save</span>
+                    </>
+                  )}
+                </Button>
+              </div>
             )}
-          </Button>
+          </div>
         </div>
+
+        {/* Backdrop blur effect (subtle) */}
+        <div className="absolute inset-0 -z-10 blur-xl bg-linear-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 rounded-xl" />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  turbopack: {},
   webpack: (config, { isServer }) => {
     config.ignoreWarnings = [
       ...(config.ignoreWarnings || []),
@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
       },
     ];
 
-    // Handle external dependencies from @qb/quickbot package
+    // Webpack configuration
     if (!isServer) {
       // For client-side, ensure Supabase is resolved from node_modules
       config.resolve.alias = {

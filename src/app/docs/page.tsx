@@ -6,8 +6,8 @@ const setupSteps = [
     body: `Head to /bots and click “Create bot”. Name it something meaningful for your workspace or client, then hit Generate to let QuickBots supply the initial persona/config for you.`,
   },
   {
-    title: "2. Fill onboarding + AI assist",
-    body: `Use the onboarding wizard to describe the company, product, target audience, and guardrails. QuickBots will run AI-assist to produce persona, thesis, greetings, runtime defaults, and UI settings.`,
+    title: "2. Configure your bot with AI assist",
+    body: `Use the Config tab to customize your bot's persona, thesis, greetings, and settings. Click the AI generate buttons next to each field to automatically create content based on your bot's context, or manually edit any field to match your brand voice.`,
   },
   {
     title: "3. Review runtime & quotas",

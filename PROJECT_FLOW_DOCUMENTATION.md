@@ -439,7 +439,7 @@ React Components (camelCase)
 ### Initialization
 
 ```
-1. <Chatbot botId="..." /> mounts
+1. <QuickBot botId="..." /> mounts
 2. useEffect fetches config:
    - Calls fetchBotConfig(botId)
    - GET /api/config/[bot_id]

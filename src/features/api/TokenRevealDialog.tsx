@@ -1,15 +1,16 @@
 "use client";
 
+import { AlertTriangleIcon, Copy } from "lucide-react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { AlertTriangleIcon, Copy } from "lucide-react";
-import { toast } from "sonner";
 
 type TokenRevealProps = {
   token: string;

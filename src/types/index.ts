@@ -6,4 +6,4 @@
 export * from "./result";
 export * from "./bot.types";
 export * from "./cache.types";
-
+export * from "./ai.types";

@@ -1,8 +1,14 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
+import { Monitor, Moon, Sun, Check } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useEffect, useState } from "react";
 
 export function ThemeToggle() {
@@ -14,20 +20,66 @@ export function ThemeToggle() {
   }, []);
 
   if (!mounted) {
-    return null;
+    return (
+      <Button variant="ghost" size="icon" className="h-9 w-9">
+        <Sun className="h-4 w-4" />
+      </Button>
+    );
   }
 
+  const themes = [
+    {
+      name: "Light",
+      value: "light",
+      icon: Sun,
+    },
+    {
+      name: "Dark",
+      value: "dark",
+      icon: Moon,
+    },
+    {
+      name: "System",
+      value: "system",
+      icon: Monitor,
+    },
+  ];
+
+  const currentTheme = themes.find((t) => t.value === theme);
+  const CurrentIcon = currentTheme?.icon || Sun;
+
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-    >
-      {theme === "dark" ? (
-        <Sun className="h-4 w-4" />
-      ) : (
-        <Moon className="h-4 w-4" />
-      )}
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-9 w-9 hover:bg-accent hover:text-accent-foreground transition-colors"
+        >
+          <CurrentIcon className="h-4 w-4" />
+          <span className="sr-only">Toggle theme</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-40">
+        {themes.map((themeOption) => {
+          const Icon = themeOption.icon;
+          const isActive = theme === themeOption.value;
+          
+          return (
+            <DropdownMenuItem
+              key={themeOption.value}
+              onClick={() => setTheme(themeOption.value)}
+              className="flex items-center justify-between cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <Icon className="h-4 w-4" />
+                <span>{themeOption.name}</span>
+              </div>
+              {isActive && <Check className="h-4 w-4 text-primary" />}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

@@ -1,10 +1,10 @@
 "use client";
-import { useState, useCallback, memo, type ReactNode } from "react";
 
-// This is a static marketing page - no dynamic data needed
-export const dynamic = "force-static";
-import Link from "next/link";
+import { memo, useState, type ReactNode } from "react";
 import Image, { type StaticImageData } from "next/image";
+import Link from "next/link";
+import { useTheme } from "next-themes";
+import { motion } from "framer-motion";
 import {
   ArrowRight,
   Bot,
@@ -12,25 +12,26 @@ import {
   Sparkles,
   TrendingUp,
 } from "lucide-react";
-import { motion } from "framer-motion";
-import SplitText from "@/components/SplitText";
-import quickbotsIcon from "./assets/quickbots-logo.png";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import SplitText from "@/components/SplitText";
+import dashboardimage from "../assets/hero-dashboard-dark.png";
+import dashboardimagewhite from "../assets/hero-dashboard-light.png";
+import feature1 from "../assets/feature-personality.png";
+import feature2 from "../assets/feature-multiplatform-integration.jpeg";
+import feature3 from "../assets/feature-advanced-analytics.jpeg";
+import quickbotsIcon from "../assets/quickbots-logo.png";
 
-import dashboardimage from "./assets/hero-dashboard-dark.png";
-import dashboardimagewhite from "./assets/hero-dashboard-light.png";
-import feature1 from "./assets/feature-personality.png";
-import feature2 from "./assets/feature-multiplatform-integration.jpeg";
-import feature3 from "./assets/feature-advanced-analytics.jpeg";
-import { useTheme } from "next-themes";
+// This is a static marketing page - no dynamic data needed
+export const dynamic = "force-static";
 
 interface PowerFeature {
   id: string;
@@ -119,7 +120,6 @@ const featureItems: FeatureItem[] = [
 
 const Hero = memo(function Hero() {
   const { theme } = useTheme();
-  const handleSplitComplete = useCallback(() => {}, []);
   return (
     <section className="relative overflow-hidden py-10 sm:py-12 md:py-16 lg:py-20 xl:py-28">
       <div className="absolute inset-0 -z-10">
@@ -185,7 +185,7 @@ const Hero = memo(function Hero() {
                   threshold={0.2}
                   rootMargin="-50px"
                   textAlign="center"
-                  onLetterAnimationComplete={handleSplitComplete}
+                  onLetterAnimationComplete={() => {}}
                 />
               </div>
               <p className="mx-auto max-w-3xl text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-muted-foreground leading-relaxed">
@@ -200,7 +200,7 @@ const Hero = memo(function Hero() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3 justify-center md:justify-start pt-2 sm:pt-3 md:pt-4 lg:pt-5 xl:pt-6">
+            <div className="flex flex-wrap gap-3 justify-center  pt-2 sm:pt-3 md:pt-4 lg:pt-5 xl:pt-6">
               <Button
                 size="lg"
                 className=" px-5 sm:px-6 md:px-7 lg:px-8 xl:px-10 py-3 sm:py-4 md:py-5 lg:py-6 xl:py-7 text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold shadow-lg hover:scale-105 transition-transform duration-200"
@@ -352,10 +352,7 @@ const PowerfulFeaturesSection = memo(function PowerfulFeaturesSection() {
 
 const FeaturesSection = memo(function FeaturesSection() {
   const [activeTabId, setActiveTabId] = useState<number>(1);
-  const handleTabChange = useCallback(
-    (tabId: number) => setActiveTabId(tabId),
-    []
-  );
+  const handleTabChange = (tabId: number) => setActiveTabId(tabId);
 
   return (
     <section className="py-10 sm:py-12 md:py-16 lg:py-20 xl:py-28 relative overflow-hidden">

@@ -1,21 +1,15 @@
 "use client";
 
-import { startTransition, useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertTriangleIcon, InfoIcon } from "lucide-react";
+import { toast } from "sonner";
+import { GenerateButton, GenerateFieldSheet } from "@/features/ai-generation";
+import type { FieldType } from "@/types/ai.types";
 
-import { usePreviewActions } from "@/lib/client/preview";
-import { previewSchema } from "@/schema";
-import type { PreviewType } from "@/types";
-import {
-  useBotData,
-  useBotConfigs,
-  useBotSettings,
-} from "@/components/bot-context";
-import { useSupabase } from "@/providers/SupabaseProvider";
-import { getThemePack } from "@/lib/themes/theme-packs";
-
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import SaveTriggerUI from "@/components/SaveTriggerUI";
 import {
   Form,
   FormControl,
@@ -25,7 +19,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+  InputGroupText,
+} from "@/components/ui/input-group";
 import {
   Select,
   SelectContent,
@@ -33,13 +33,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Spinner } from "@/components/ui/spinner";
-import { AlertTriangleIcon } from "lucide-react";
-import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
-import { Chatbot } from "@qb/quickbot";
+import {
+  useBotConfigs,
+  useBotData,
+  useBotSettings,
+} from "@/components/bot-context";
+import { usePreviewActions } from "@/lib/hooks/use-bot-preview";
+import { useSupabase } from "@/providers/SupabaseProvider";
+import { previewSchema } from "@/schema";
+import type { PreviewType } from "@/types";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface PreviewLayoutFormProps {
   onDirtyChange?: (isDirty: boolean) => void;
@@ -51,10 +62,42 @@ export default function PreviewLayoutForm({
   const { bot } = useBotData();
   const { configs } = useBotConfigs();
   const { settings } = useBotSettings();
-  const { isLoaded } = useSupabase();
+  const { isReady: isLoaded } = useSupabase();
   const { getPreview, updatePreview } = usePreviewActions();
 
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [activeField, setActiveField] = useState<FieldType | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  const handleGenerateClick = (field: FieldType) => {
+    setActiveField(field);
+    setSheetOpen(true);
+  };
+
+  const handleApply = (field: string, value: string | string[]) => {
+    if (field === "quick_questions") {
+      // Handle array field
+      (value as string[]).forEach((q, index) => {
+        form.setValue(
+          `quickQuestions.${index}` as keyof PreviewType,
+          q as PreviewType[keyof PreviewType],
+          {
+            shouldDirty: true,
+            shouldValidate: true,
+          }
+        );
+      });
+    } else {
+      form.setValue(
+        field as keyof PreviewType,
+        value as PreviewType[keyof PreviewType],
+        {
+          shouldDirty: true,
+          shouldValidate: true,
+        }
+      );
+    }
+  };
 
   // Refs for update tracking
   const lastLocalUpdateTimeRef = useRef<number | null>(null);
@@ -75,11 +118,11 @@ export default function PreviewLayoutForm({
       showTimestamps: true,
     },
     resolver: zodResolver(previewSchema),
-    mode: "onChange",
+    mode: "onBlur",
     shouldFocusError: false,
   });
 
-  const [isPending, setIsPending] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Polling status for chatbot
@@ -89,62 +132,60 @@ export default function PreviewLayoutForm({
   const [lastUpdateHadChanges, setLastUpdateHadChanges] = useState(false);
 
   const handleUpdate = async (formData: PreviewType) => {
-    setIsPending(true);
-    setErrorMessage(null);
+    startTransition(async () => {
+      setErrorMessage(null);
 
-    const result = await updatePreview(bot.bot_id!, formData);
+      const result = await updatePreview(bot.bot_id!, formData);
 
-    if (result.ok) {
-      toast.success("Preview settings saved!");
+      if (result.ok) {
+        toast.success("Preview settings saved!");
 
-      if (result.data) {
-        const dbTime = result.data.updatedAt
-          ? new Date(result.data.updatedAt).getTime()
-          : Date.now();
-        dbUpdatedAtRef.current = dbTime;
-        lastLocalUpdateTimeRef.current = dbTime; // Store the timestamp we expect
+        if (result.data) {
+          const dbTime = result.data.updatedAt
+            ? new Date(result.data.updatedAt).getTime()
+            : Date.now();
+          dbUpdatedAtRef.current = dbTime;
+          lastLocalUpdateTimeRef.current = dbTime; // Store the timestamp we expect
 
-        const paddedQuickQuestions = [
-          ...(result.data.quickQuestions || []),
-          ...Array(5 - (result.data.quickQuestions?.length || 0)).fill(""),
-        ].slice(0, 5);
+          const paddedQuickQuestions = [
+            ...(result.data.quickQuestions || []),
+            ...Array(5 - (result.data.quickQuestions?.length || 0)).fill(""),
+          ].slice(0, 5);
 
-        form.reset({
-          ...result.data,
-          quickQuestions: paddedQuickQuestions,
+          form.reset({
+            ...result.data,
+            quickQuestions: paddedQuickQuestions,
+          });
+
+          // Clear the local update flag after 2 seconds
+          setTimeout(() => {
+            lastLocalUpdateTimeRef.current = null;
+          }, 2000);
+        }
+      } else {
+        const message = result.message || "Failed to save settings";
+        setErrorMessage(message);
+        const isAuthError =
+          message.toLowerCase().includes("authentication") ||
+          message.toLowerCase().includes("user authentication");
+        toast.error(message, {
+          duration: isAuthError ? 8000 : 5000,
         });
-
-        // Clear the local update flag after 2 seconds
-        setTimeout(() => {
-          lastLocalUpdateTimeRef.current = null;
-        }, 2000);
+        lastLocalUpdateTimeRef.current = null;
       }
-    } else {
-      const message = result.message || "Failed to save settings";
-      setErrorMessage(message);
-      const isAuthError =
-        message.toLowerCase().includes("authentication") ||
-        message.toLowerCase().includes("user authentication");
-      toast.error(message, {
-        duration: isAuthError ? 8000 : 5000,
-      });
-      lastLocalUpdateTimeRef.current = null;
-    }
-
-    setIsPending(false);
+    });
   };
 
   const onSubmit = form.handleSubmit((data) => {
-    // Always force autoGreetOnOpen to true
     const dataWithGreeting = {
       ...data,
       autoGreetOnOpen: true,
     };
-    startTransition(() => handleUpdate(dataWithGreeting));
+
+    handleUpdate(dataWithGreeting);
   });
 
   const { isDirty, isSubmitting } = form.formState;
-  const isLoading = isSubmitting || isPending;
 
   // Notify parent about dirty state changes
   useEffect(() => {
@@ -335,11 +376,6 @@ export default function PreviewLayoutForm({
     return () => clearInterval(interval);
   }, [lastPollTime]);
 
-  const themeValue = form.watch("theme");
-  const themePack = getThemePack(
-    themeValue as "modern" | "classic" | "minimal" | "bubble" | "retro"
-  );
-
   return (
     <Card className="border-none shadow-none p-0">
       <VisuallyHidden>
@@ -361,16 +397,6 @@ export default function PreviewLayoutForm({
             </div>
           ) : (
             <div className="overflow-y-auto px-4 py-4 relative">
-              {isLoading && (
-                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-lg">
-                  <div className="flex flex-col items-center gap-3">
-                    <Spinner className="size-6 text-primary" />
-                    <p className="text-sm text-muted-foreground">
-                      Saving settings...
-                    </p>
-                  </div>
-                </div>
-              )}
               <Form {...form}>
                 <form onSubmit={onSubmit} className="space-y-6">
                   {/* Section: Theme */}
@@ -396,6 +422,7 @@ export default function PreviewLayoutForm({
                             <Select
                               onValueChange={field.onChange}
                               value={field.value}
+                              disabled={true}
                             >
                               <SelectTrigger className="h-9 text-sm bg-background border-border focus:border-primary focus:ring-1 focus:ring-primary">
                                 <SelectValue placeholder="Select theme" />
@@ -413,45 +440,6 @@ export default function PreviewLayoutForm({
                         </FormItem>
                       )}
                     />
-
-                    {/* Theme Preview */}
-                    <div className="p-4 rounded-lg border border-border bg-card/50">
-                      <p className="text-xs font-medium mb-2">Theme Preview</p>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div>
-                          <span className="text-muted-foreground">
-                            Background:
-                          </span>
-                          <div
-                            className="w-full h-6 rounded border border-border mt-1"
-                            style={{
-                              backgroundColor: themePack.backgroundColor,
-                            }}
-                          />
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Header:</span>
-                          <div
-                            className="w-full h-6 rounded border border-border mt-1"
-                            style={{ backgroundColor: themePack.headerColor }}
-                          />
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Accent:</span>
-                          <div
-                            className="w-full h-6 rounded border border-border mt-1"
-                            style={{ backgroundColor: themePack.accentColor }}
-                          />
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Button:</span>
-                          <div
-                            className="w-full h-6 rounded border border-border mt-1"
-                            style={{ backgroundColor: themePack.buttonColor }}
-                          />
-                        </div>
-                      </div>
-                    </div>
                   </div>
 
                   {/* Section: Bot Identity */}
@@ -496,10 +484,19 @@ export default function PreviewLayoutForm({
                           <FormControl>
                             <Textarea
                               placeholder="Hi! How can I assist you today?"
-                              className="min-h-[60px] text-sm bg-background border-border focus:border-primary focus:ring-1 focus:ring-primary resize-none"
+                              className="min-h-[60px] text-sm bg-muted border-border cursor-not-allowed resize-none"
                               {...field}
+                              disabled
                             />
                           </FormControl>
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <InfoIcon className="h-3 w-3" />
+                            Go to{" "}
+                            <span className="font-medium text-foreground">
+                              Configuration → Greetings
+                            </span>{" "}
+                            to modify the welcome message
+                          </p>
                           <FormMessage className="text-xs" />
                         </FormItem>
                       )}
@@ -522,9 +519,16 @@ export default function PreviewLayoutForm({
                       name="quickQuestions"
                       render={() => (
                         <FormItem className="space-y-2">
-                          <FormLabel className="text-xs font-medium text-foreground">
-                            Quick Questions (up to 5)
-                          </FormLabel>
+                          <div className="flex items-center justify-between">
+                            <FormLabel className="text-xs font-medium text-foreground">
+                              Quick Questions (up to 5)
+                            </FormLabel>
+                            <GenerateButton
+                              onClick={() =>
+                                handleGenerateClick("quick_questions")
+                              }
+                            />
+                          </div>
                           <div className="space-y-2">
                             {[0, 1, 2, 3, 4].map((index) => (
                               <FormField
@@ -633,16 +637,38 @@ export default function PreviewLayoutForm({
                             Auto Open Delay (ms)
                           </FormLabel>
                           <FormControl>
-                            <Input
-                              type="number"
-                              min="0"
-                              placeholder="0"
-                              className="h-9 text-sm bg-background border-border focus:border-primary focus:ring-1 focus:ring-primary"
-                              {...field}
-                              onChange={(e) =>
-                                field.onChange(parseInt(e.target.value) || 0)
-                              }
-                            />
+                            <InputGroup>
+                              <InputGroupInput
+                                // className="h-9 text-sm bg-background border-border focus:border-primary focus:ring-1 focus:ring-primary"
+                                className="pl-1!"
+                                type="number"
+                                min="0"
+                                placeholder="0"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(parseInt(e.target.value))
+                                }
+                              />
+                              <InputGroupAddon>
+                                <InputGroupText>2500 + </InputGroupText>
+                              </InputGroupAddon>
+                              <InputGroupAddon align="inline-end">
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <InputGroupButton
+                                      className="rounded-full"
+                                      size="icon-xs"
+                                    >
+                                      <InfoIcon />
+                                    </InputGroupButton>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    Your delay is added on top of a base
+                                    animation timing (2500ms).
+                                  </TooltipContent>
+                                </Tooltip>
+                              </InputGroupAddon>
+                            </InputGroup>
                           </FormControl>
                           <FormMessage className="text-xs" />
                         </FormItem>
@@ -652,14 +678,15 @@ export default function PreviewLayoutForm({
                     <FormField
                       control={form.control}
                       name="autoGreetOnOpen"
-                      render={({ field }) => (
+                      render={({}) => (
                         <FormItem className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/50">
-                          <div className="space-y-0.5">
+                          <div className="space-y-0.5 flex-1">
                             <FormLabel className="text-xs font-medium text-foreground">
                               Auto Greet On Open
                             </FormLabel>
                             <p className="text-xs text-muted-foreground">
-                              Show welcome message when widget opens
+                              Always enabled - Shows welcome message when widget
+                              opens
                             </p>
                           </div>
                           <FormControl>
@@ -766,26 +793,6 @@ export default function PreviewLayoutForm({
               </Form>
             </div>
           )}
-
-          {!isLoadingData && (
-            <div className="flex flex-1 gap-3 justify-between">
-              <Button
-                onClick={onSubmit}
-                size="sm"
-                className="w-full h-9 text-sm font-medium"
-                disabled={isLoading || !isDirty || isSubmitting}
-              >
-                {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <Spinner className="size-4" />
-                    Saving...
-                  </span>
-                ) : (
-                  "Save Settings"
-                )}
-              </Button>
-            </div>
-          )}
         </div>
         <div className="basis-1/2 border-l border-border bg-card flex flex-col items-center justify-center p-8 relative">
           {/* Polling Status Indicator */}
@@ -820,16 +827,47 @@ export default function PreviewLayoutForm({
               )}
             </div>
           )}
-
-          {!isLoadingData && bot.bot_id ? (
-            <Chatbot botId={bot.bot_id} />
-          ) : (
-            <div className="flex items-center justify-center">
-              <Spinner className="size-6 text-muted-foreground" />
-            </div>
-          )}
+          <div className="relative w-full h-full">
+            {!isLoadingData && bot.bot_id ? (
+              // <QuickBot botId={bot.bot_id} />
+              <div>Hello</div>
+            ) : (
+              <div className="flex items-center justify-center w-full h-full">
+                <Spinner className="size-6 text-muted-foreground" />
+              </div>
+            )}
+          </div>
         </div>
       </CardContent>
+
+      {!isLoadingData && (
+        <SaveTriggerUI
+          isDirty={isDirty}
+          isSubmitting={isSubmitting}
+          isPendingUpdate={isPending}
+          onSave={onSubmit}
+          phrase="Preview Settings"
+        />
+      )}
+
+      {activeField && (
+        <GenerateFieldSheet
+          open={sheetOpen}
+          onOpenChange={setSheetOpen}
+          field={activeField}
+          botId={bot.bot_id!}
+          currentValue={
+            activeField === "quick_questions"
+              ? form.getValues("quickQuestions")?.join("\n")
+              : (form.getValues(
+                  activeField === "welcome_message"
+                    ? "welcomeMessage"
+                    : (activeField as keyof PreviewType)
+                ) as string)
+          }
+          onApply={(value) => handleApply(activeField, value)}
+        />
+      )}
     </Card>
   );
 }

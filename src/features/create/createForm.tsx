@@ -1,22 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertTriangleIcon } from "lucide-react";
 
-import { useBotActions } from "@/lib/client/bot";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
+import { useBotActions } from "@/lib/hooks/use-bot";
 import { botSchema } from "@/schema";
 import type { BotFormInputType, BotType } from "@/types";
-
 import type { Result } from "@/types/result";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangleIcon } from "lucide-react";
-import { Spinner } from "@/components/ui/spinner";
 
 export default function BotForm() {
   const router = useRouter();
@@ -48,7 +46,7 @@ export default function BotForm() {
       const botId = result.data.bot_id;
       reset();
       // Use window.location for hard navigation to ensure modal closes
-      window.location.href = `/bots/${botId}/onboarding`;
+      window.location.href = `/bots/${botId}/configure`;
       return;
     }
     setIsPending(false);
@@ -60,10 +58,10 @@ export default function BotForm() {
       <Card className="border-none shadow-none p-0 w-full max-w-4xl">
         <CardHeader className="text-center pb-6">
           <CardTitle className="text-2xl font-semibold">
-            Create New Bot
+            Create New Quickbot Project
           </CardTitle>
           <p className="text-muted-foreground">
-            Enter a name for your new AI bot.
+            Enter the project name and its description.
           </p>
         </CardHeader>
 
@@ -71,11 +69,11 @@ export default function BotForm() {
           <form onSubmit={onSubmit} className="space-y-6">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Bot Name</Label>
+                <Label htmlFor="name">Project Name</Label>
                 <Input
                   {...register("name")}
                   id="name"
-                  placeholder="Enter bot name"
+                  placeholder="name..."
                   className="h-10"
                   autoComplete="off"
                 />
@@ -87,10 +85,12 @@ export default function BotForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Bot Description</Label>
+                <Label htmlFor="description">
+                  Project Description and purpose
+                </Label>
                 <Input
                   {...register("description")}
-                  placeholder="Enter bot description"
+                  placeholder="description..."
                   id="description"
                   className="h-10"
                   autoComplete="off"
@@ -112,7 +112,7 @@ export default function BotForm() {
 
             <div className="flex flex-col gap-3 pt-2">
               <Button type="submit" disabled={isLoading} className="w-full">
-                {isLoading ? <Spinner /> : "Create Bot"}
+                {isLoading ? <Spinner /> : "Create"}
               </Button>
 
               <Button

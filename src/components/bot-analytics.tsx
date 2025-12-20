@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -22,8 +22,9 @@ export default function BotManagementDashboard({ bot }: { bot: BotType }) {
   const [isOnline] = useState(true);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const fetchAnalytics = useCallback(
-    async (isInitialLoad = false) => {
+  // Fetch analytics - stable effect with no function dependencies
+  useEffect(() => {
+    const fetchAnalytics = async (isInitialLoad = false) => {
       if (!bot.bot_id) {
         setError("Bot ID is missing");
         setLoading(false);
@@ -56,18 +57,15 @@ export default function BotManagementDashboard({ bot }: { bot: BotType }) {
           setLoading(false);
         }
       }
-    },
-    [bot.bot_id]
-  );
+    };
 
-  useEffect(() => {
     // Initial load with loading state
     fetchAnalytics(true);
 
     // Set up 30 second interval for background refetching
     intervalRef.current = setInterval(() => {
       fetchAnalytics(false);
-    }, 30000); // 30 seconds
+    }, 10000 * 60); // 10 minutes
 
     // Cleanup interval on unmount or bot_id change
     return () => {
@@ -76,7 +74,7 @@ export default function BotManagementDashboard({ bot }: { bot: BotType }) {
         intervalRef.current = null;
       }
     };
-  }, [fetchAnalytics]);
+  }, [bot.bot_id]);
 
   if (loading) {
     return (

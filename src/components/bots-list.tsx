@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
-import { useBotActions } from "@/lib/client/bot";
-import { useSupabase } from "@/providers/SupabaseProvider";
-import { useUser } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
+import { useBotActions } from "@/lib/hooks/use-bot";
 import type { BotType } from "@/types";
 import BotCard from "@/components/bot-display";
 import { CardContent } from "@/components/ui/card";
@@ -50,63 +48,33 @@ function EmptyState() {
 }
 
 export default function BotsList() {
-  const { getBots } = useBotActions();
-  const { isLoaded: supabaseLoaded } = useSupabase();
-  const { isLoaded: userLoaded, user } = useUser();
+  const { getBots, isReady } = useBotActions();
   const [bots, setBots] = useState<BotType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const fetchRef = useRef<(() => Promise<void>) | null>(null);
 
-  const isReady = supabaseLoaded && userLoaded;
+  // Initial fetch - wait for system readiness
+  useEffect(() => {
+    if (!isReady) return;
 
-  const fetchBots = useCallback(async () => {
-    if (!isReady || !user) {
-      if (isReady && !user) {
-        setError("Please sign in to view your bots");
-        setLoading(false);
+    const fetchBots = async () => {
+      setLoading(true);
+      setError(null);
+
+      const result = await getBots();
+      console.log(result);
+
+      if (result.ok && result.data) {
+        setBots(result.data);
+      } else {
+        setError("message" in result ? result.message : "Failed to fetch bots");
       }
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    const result = await getBots();
-
-    if (result.ok && result.data) {
-      setBots(result.data);
-    } else {
-      setError("message" in result ? result.message : "Failed to fetch bots");
-    }
-    setLoading(false);
-  }, [isReady, user, getBots]);
-
-  // Store fetch function in ref for external access
-  useEffect(() => {
-    fetchRef.current = fetchBots;
-  }, [fetchBots]);
-
-  // Initial fetch
-  useEffect(() => {
-    fetchBots();
-  }, [fetchBots]);
-
-  // Expose refetch function via window for mutations
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      (window as Window & { refetchBots?: () => void }).refetchBots = () => {
-        if (fetchRef.current) {
-          fetchRef.current();
-        }
-      };
-    }
-    return () => {
-      if (typeof window !== "undefined") {
-        delete (window as Window & { refetchBots?: () => void }).refetchBots;
-      }
+      setLoading(false);
     };
-  }, []);
+
+    fetchBots();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReady]);
 
   if (loading) {
     return (

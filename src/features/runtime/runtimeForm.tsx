@@ -1,8 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { Resolver, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
 
 import {
   Form,
@@ -14,10 +14,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-
+import { useBotData, useBotRuntimeSettings } from "@/components/bot-context";
 import { botRuntimeSettingsSchema } from "@/schema";
 import type { BotRuntimeSettingsType } from "@/types";
-import { useBotData, useBotRuntimeSettings } from "@/components/bot-context";
 
 export default function BotRun() {
   const { runtimeSettings } = useBotRuntimeSettings();
@@ -56,7 +55,8 @@ export default function BotRun() {
             Advance Bot Settings
           </h1>
           <p className="text-sm text-muted-foreground">
-            View your bot&apos;s operational parameters and resource limits (read-only).
+            View your bot&apos;s operational parameters and resource limits
+            (read-only).
           </p>
         </div>
 

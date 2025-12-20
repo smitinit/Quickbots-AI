@@ -1,10 +1,12 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState } from "react";
 
 interface PreviewModalContextType {
   isPreviewOpen: boolean;
   setIsPreviewOpen: (open: boolean) => void;
+  isAiSheetOpen: boolean;
+  setIsAiSheetOpen: (open: boolean) => void;
 }
 
 const PreviewModalContext = createContext<PreviewModalContextType | null>(null);
@@ -15,16 +17,15 @@ export function PreviewModalProvider({
   children: React.ReactNode;
 }) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-
-  const handleSetIsPreviewOpen = useCallback((open: boolean) => {
-    setIsPreviewOpen(open);
-  }, []);
+  const [isAiSheetOpen, setIsAiSheetOpen] = useState(false);
 
   return (
     <PreviewModalContext.Provider
       value={{
         isPreviewOpen,
-        setIsPreviewOpen: handleSetIsPreviewOpen,
+        setIsPreviewOpen,
+        isAiSheetOpen,
+        setIsAiSheetOpen,
       }}
     >
       {children}
@@ -39,6 +40,8 @@ export function usePreviewModal() {
     return {
       isPreviewOpen: false,
       setIsPreviewOpen: () => {},
+      isAiSheetOpen: false,
+      setIsAiSheetOpen: () => {},
     };
   }
   return context;

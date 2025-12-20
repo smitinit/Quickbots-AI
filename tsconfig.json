@@ -28,7 +28,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "extract-public-key.js"
+    "extract-public-key.js",
+    "src/app/embed/web-component.ts"
   ],
   "exclude": ["node_modules"]
 }

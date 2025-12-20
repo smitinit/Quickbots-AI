@@ -1,7 +1,8 @@
 "use client";
-import { Copy, CheckCircle2 } from "lucide-react";
-import { toast } from "sonner";
+
 import { useState } from "react";
+import { CheckCircle2, Copy } from "lucide-react";
+import { toast } from "sonner";
 
 import { useBotData } from "@/components/bot-context";
 
@@ -94,12 +95,12 @@ export default function ApiConfig() {
                   <button
                     onClick={() =>
                       copyToClipboard(
-                        `import { Chatbot } from "@qb/quickbot";
+                        `import { QuickBot } from "@/components/quickbot";
 
 export default function App() {
   return (
     <div>
-      <Chatbot botId="${bot.bot_id}" />
+      <QuickBot botId="${bot.bot_id}" />
     </div>
   );
 }`,
@@ -123,12 +124,12 @@ export default function App() {
                 </div>
                 <pre className="bg-muted/50 border border-border/50 rounded-lg p-4 overflow-x-auto">
                   <code className="text-xs font-mono text-foreground">
-                    {`import { Chatbot } from "@qb/quickbot";
+                    {`import { QuickBot } from "@/components/quickbot";
 
 export default function App() {
   return (
     <div>
-      <Chatbot botId="${bot.bot_id}" />
+      <QuickBot botId="${bot.bot_id}" />
     </div>
   );
 }`}

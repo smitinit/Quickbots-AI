@@ -1,5 +1,18 @@
 ## This project is currently under development and will be live soon...!
 
+### Embed QuickBot on Your Website
+
+To embed a QuickBot chatbot on your website, add this script tag:
+
+```html
+<script 
+  src="https://YOUR_DOMAIN.com/quickbot-embed.js"
+  data-bot-id="YOUR_BOT_ID">
+</script>
+```
+
+The chatbot will automatically appear as a floating button in the bottom-right corner. Click it to open the chat interface.
+
 ### Here are the glimps of this project
 
 <img width="1913" height="923" alt="image" src="https://github.com/user-attachments/assets/ac55178f-9a16-42cc-8408-970b9909c814" />

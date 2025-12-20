@@ -64,7 +64,7 @@ export async function logChat({
 
   while (retryCount < maxRetries) {
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("bot_chat_logs")
         .insert({
           bot_id: botId,
@@ -170,21 +170,17 @@ export async function getChatLogsBySession(
     }
 
     // Group by user_session_id
-    const grouped = (data as ChatLogRow[]).reduce(
-      (acc, log) => {
-        const sessionId = log.user_session_id;
-        if (!acc[sessionId]) {
-          acc[sessionId] = [];
-        }
-        acc[sessionId].push(log);
-        return acc;
-      },
-      {} as Record<string, ChatLogRow[]>
-    );
+    const grouped = (data as ChatLogRow[]).reduce((acc, log) => {
+      const sessionId = log.user_session_id;
+      if (!acc[sessionId]) {
+        acc[sessionId] = [];
+      }
+      acc[sessionId].push(log);
+      return acc;
+    }, {} as Record<string, ChatLogRow[]>);
 
     return { data: grouped, error: null };
   } catch (err) {
     return { data: null, error: err };
   }
 }
-

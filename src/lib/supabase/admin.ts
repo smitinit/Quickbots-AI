@@ -9,4 +9,3 @@ export const supabaseAdmin = createClient(
     auth: { persistSession: false },
   }
 );
-

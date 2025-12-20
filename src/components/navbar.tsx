@@ -8,51 +8,21 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import Link from "next/link";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./theme-toggle";
 import {
-  Menu,
-  X,
-  Bot,
-  Home,
-  Settings,
-  FileText,
-  ArrowBigRightDashIcon,
-  BookOpenIcon,
-} from "lucide-react";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Menu, Bot, BookOpenIcon } from "lucide-react";
 import Image from "next/image";
-import quickbotsIcon from "@/app/assets/quickbots-logo.png";
-const navigationItems = [
-  {
-    title: "Dashboard",
-    href: "/bots",
-    description: "Manage your AI bots and view analytics",
-    icon: Home,
-  },
-  {
-    title: "Bots",
-    href: "/bots",
-    description: "Create and configure your AI assistants",
-    icon: Bot,
-  },
-  {
-    title: "Templates",
-    href: "/#",
-    description: "Pre-built bot templates for quick setup",
-    icon: FileText,
-  },
-  {
-    title: "Settings",
-    href: "/#",
-    description: "Account and application preferences",
-    icon: Settings,
-  },
-];
+import quickbotsIcon from "@/assets/quickbots-logo.png";
 
 export default function Navbar() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/95 backdrop-blur-md supports-backdrop-filter:bg-background/80">
       <div className="container mx-auto px-4">
@@ -76,17 +46,34 @@ export default function Navbar() {
 
           {/* Right side actions */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <Button asChild variant="default" size="sm">
-              <Link href="/docs" className="flex items-center gap-2">
-                View docs <BookOpenIcon className="w-4 h-4" />
-              </Link>
-            </Button>
-            <Button asChild variant="default" size="sm">
-              <Link href="/bots" className="flex items-center gap-2">
-                Your bots <ArrowBigRightDashIcon className="w-4 h-4" />
-              </Link>
-            </Button>
-            <ThemeToggle />
+            {/* Dashboard button - visible on desktop for signed-in users */}
+            <SignedIn>
+              <Button
+                asChild
+                variant="default"
+                size="sm"
+                className="hidden md:flex"
+              >
+                <Link href="/bots" className="flex items-center gap-2">
+                  Dashboard
+                </Link>
+              </Button>
+            </SignedIn>
+
+            {/* Get Started button - visible on desktop for signed-out users */}
+            <SignedOut>
+              <Button
+                asChild
+                variant="default"
+                size="sm"
+                className="hidden md:flex"
+              >
+                <Link href="/bots" className="flex items-center gap-2">
+                  Get Started
+                </Link>
+              </Button>
+            </SignedOut>
+
             <SignedOut>
               <div className="hidden sm:flex items-center gap-2">
                 <SignInButton mode="redirect">
@@ -94,16 +81,12 @@ export default function Navbar() {
                     Sign In
                   </Button>
                 </SignInButton>
-                <SignUpButton mode="redirect">
-                  <Button
-                    size="sm"
-                    className="bg-primary hover:bg-primary/90 text-sm"
-                  >
-                    Get Started
-                  </Button>
-                </SignUpButton>
               </div>
             </SignedOut>
+            {/* Theme toggle - visible on desktop */}
+            <div className="hidden md:flex">
+              <ThemeToggle />
+            </div>
 
             <SignedIn>
               <UserButton
@@ -115,82 +98,96 @@ export default function Navbar() {
               />
             </SignedIn>
 
-            {/* Mobile menu button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="md:hidden "
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </Button>
-          </div>
-        </div>
+            {/* Desktop menu dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="hidden md:flex">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel>Menu</DropdownMenuLabel>
+                <DropdownMenuSeparator />
 
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-border/30 bg-background/95 backdrop-blur-md">
-            <div className="px-2 py-3 space-y-1">
-              {navigationItems.map((item) => {
-                const Icon = item.icon;
-                return (
+                <DropdownMenuItem asChild>
                   <Link
-                    key={item.title}
-                    href={item.href}
-                    className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-foreground hover:bg-accent/50 transition-colors duration-200 "
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    href="/docs"
+                    className="flex items-center gap-2 cursor-pointer"
                   >
-                    <Icon className="h-4 w-4 text-muted-foreground" />
-                    <span>{item.title}</span>
+                    <BookOpenIcon className="h-4 w-4" />
+                    <span>Docs</span>
                   </Link>
-                );
-              })}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-              <div className="border-t border-border/30 pt-3 mt-3">
-                <Link
-                  href="/pricing"
-                  className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-foreground hover:bg-accent/50 transition-colors duration-200 "
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <span>Pricing</span>
-                </Link>
+            {/* Theme toggle - visible on mobile */}
+            <div className="md:hidden">
+              <ThemeToggle />
+            </div>
+
+            {/* Mobile menu dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="md:hidden">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Menu</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/bots"
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <Bot className="h-4 w-4" />
+                    <span>Dashboard</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/docs"
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <BookOpenIcon className="h-4 w-4" />
+                    <span>Docs</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem asChild>
+                  <Link href="/" className="cursor-pointer">
+                    Pricing
+                  </Link>
+                </DropdownMenuItem>
 
                 <SignedOut>
-                  <div className="px-3 py-3 space-y-2">
+                  <DropdownMenuSeparator />
+                  <div className="p-2 space-y-2">
                     <SignInButton mode="redirect">
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full text-sm bg-transparent "
+                        className="w-full text-sm"
                       >
                         Sign In
                       </Button>
                     </SignInButton>
                     <SignUpButton mode="redirect">
-                      <Button size="sm" className="w-full text-sm ">
+                      <Button size="sm" className="w-full text-sm">
                         Get Started
                       </Button>
                     </SignUpButton>
                   </div>
                 </SignedOut>
-
-                <SignedIn>
-                  <Link
-                    href="/bots"
-                    className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-foreground hover:bg-accent/50 transition-colors duration-200 "
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <span>Dashboard</span>
-                  </Link>
-                </SignedIn>
-              </div>
-            </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-        )}
+        </div>
       </div>
     </nav>
   );
