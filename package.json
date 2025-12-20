@@ -1,12 +1,11 @@
 {
-  "name": "quickbots-ai-chatbots",
+  "name": "quickbots-ai",
   "version": "0.1.0",
   "private": true,
   "packageManager": "npm@11.6.1",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "turbo run build",
-    "build:next": "next build",
+    "build": "next build",
     "lint": "next lint",
     "preview": "next start"
   },
