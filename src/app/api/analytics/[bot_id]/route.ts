@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
-export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET(
