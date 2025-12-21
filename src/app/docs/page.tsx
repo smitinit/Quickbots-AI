@@ -34,6 +34,32 @@ const navSections = [
   { id: "configuration", label: "Configuration", icon: Settings },
 ];
 
+interface CodeBlockProps {
+  code: string;
+  id: string;
+  copiedCode: string | null;
+  onCopy: (text: string, id: string) => void;
+}
+
+const CodeBlock = ({ code, id, copiedCode, onCopy }: CodeBlockProps) => (
+  <div className="relative group">
+    <pre className="bg-muted p-3 sm:p-4 rounded-lg overflow-x-auto text-xs sm:text-sm">
+      <code className="whitespace-pre">{code}</code>
+    </pre>
+    <button
+      onClick={() => onCopy(code, id)}
+      className="absolute top-2 right-2 p-2 bg-background border border-border rounded hover:bg-muted transition"
+      title="Copy code"
+    >
+      {copiedCode === id ? (
+        <Check className="w-4 h-4 text-green-600" />
+      ) : (
+        <Copy className="w-4 h-4" />
+      )}
+    </button>
+  </div>
+);
+
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState("getting-started");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
@@ -79,25 +105,6 @@ export default function DocsPage() {
     setCopiedCode(id);
     setTimeout(() => setCopiedCode(null), 2000);
   };
-
-  const CodeBlock = ({ code, id }: { code: string; id: string }) => (
-    <div className="relative group">
-      <pre className="bg-muted p-3 sm:p-4 rounded-lg overflow-x-auto text-xs sm:text-sm">
-        <code className="whitespace-pre">{code}</code>
-      </pre>
-      <button
-        onClick={() => copyToClipboard(code, id)}
-        className="absolute top-2 right-2 p-2 bg-background border border-border rounded hover:bg-muted transition"
-        title="Copy code"
-      >
-        {copiedCode === id ? (
-          <Check className="w-4 h-4 text-green-600" />
-        ) : (
-          <Copy className="w-4 h-4" />
-        )}
-      </button>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -225,7 +232,12 @@ export default function DocsPage() {
               <CardContent className="space-y-4">
                 <div>
                   <p className="text-sm font-medium mb-2">Production CDN:</p>
-                  <CodeBlock code={CDN_URL} id="cdn-url" />
+                  <CodeBlock
+                    code={CDN_URL}
+                    id="cdn-url"
+                    copiedCode={copiedCode}
+                    onCopy={copyToClipboard}
+                  />
                 </div>
                 <div>
                   <p className="text-sm font-medium mb-2">Basic Script Tag:</p>
@@ -233,9 +245,13 @@ export default function DocsPage() {
                     code={`<script
   src="${CDN_URL}"
   data-bot-id="YOUR_BOT_ID"
+                    copiedCode={copiedCode}
+                    onCopy={copyToClipboard}
   defer
 ></script>`}
                     id="basic-script"
+                    copiedCode={copiedCode}
+                    onCopy={copyToClipboard}
                   />
                 </div>
                 <div className="bg-muted/50 p-4 rounded-lg">
@@ -373,10 +389,12 @@ export default function DocsPage() {
     src="${CDN_URL}"
     data-bot-id="YOUR_BOT_ID"
     defer
-  ></script>
+></script>
 </body>
 </html>`}
                         id="html-example"
+                        copiedCode={copiedCode}
+                        onCopy={copyToClipboard}
                       />
                     </div>
                     <div className="bg-muted/50 p-4 rounded-lg">
@@ -437,6 +455,8 @@ function App() {
 
 export default App;`}
                         id="react-example"
+                        copiedCode={copiedCode}
+                        onCopy={copyToClipboard}
                       />
                     </div>
                     <div>
@@ -474,6 +494,8 @@ function App() {
   return <div>My React App</div>;
 }`}
                         id="react-custom-element"
+                        copiedCode={copiedCode}
+                        onCopy={copyToClipboard}
                       />
                     </div>
                   </CardContent>
@@ -513,6 +535,8 @@ export default function Layout({ children }) {
   );
 }`}
                         id="nextjs-script"
+                        copiedCode={copiedCode}
+                        onCopy={copyToClipboard}
                       />
                     </div>
                     <div>
@@ -546,6 +570,8 @@ export function QuickBotWidget({ botId }: { botId: string }) {
 // Usage in your layout or page:
 // <QuickBotWidget botId="YOUR_BOT_ID" />`}
                         id="nextjs-component"
+                        copiedCode={copiedCode}
+                        onCopy={copyToClipboard}
                       />
                     </div>
                     <div className="bg-muted/50 p-4 rounded-lg">
@@ -605,6 +631,8 @@ onUnmounted(() => {
 });
 </script>`}
                         id="vue-example"
+                        copiedCode={copiedCode}
+                        onCopy={copyToClipboard}
                       />
                     </div>
                     <div>
@@ -636,6 +664,8 @@ export default {
 };
 </script>`}
                         id="vue-options"
+                        copiedCode={copiedCode}
+                        onCopy={copyToClipboard}
                       />
                     </div>
                   </CardContent>
@@ -684,6 +714,8 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 }`}
                         id="angular-example"
+                        copiedCode={copiedCode}
+                        onCopy={copyToClipboard}
                       />
                     </div>
                     <div>
@@ -708,6 +740,8 @@ export class AppComponent implements OnInit, OnDestroy {
 </body>
 </html>`}
                         id="angular-html"
+                        copiedCode={copiedCode}
+                        onCopy={copyToClipboard}
                       />
                     </div>
                   </CardContent>
@@ -749,6 +783,8 @@ export class AppComponent implements OnInit, OnDestroy {
   container?: HTMLElement   // Optional: Container element
 });`}
                     id="init-syntax"
+                    copiedCode={copiedCode}
+                    onCopy={copyToClipboard}
                   />
                   <div className="flex items-center gap-2 mt-2">
                     <Badge variant="destructive" className="text-xs">
@@ -772,6 +808,8 @@ window.QuickBot.init({
   container: document.getElementById('chatbot-container')
 });`}
                     id="init-example"
+                    copiedCode={copiedCode}
+                    onCopy={copyToClipboard}
                   />
                 </div>
               </CardContent>
@@ -790,6 +828,8 @@ window.QuickBot.init({
                   <CodeBlock
                     code={`window.QuickBot.destroy(botId: string);`}
                     id="destroy-syntax"
+                    copiedCode={copiedCode}
+                    onCopy={copyToClipboard}
                   />
                 </div>
                 <div>
@@ -798,6 +838,8 @@ window.QuickBot.init({
                     code={`// Remove widget
 window.QuickBot.destroy('a1b2c3d4-e5f6-7890-abcd-ef1234567890');`}
                     id="destroy-example"
+                    copiedCode={copiedCode}
+                    onCopy={copyToClipboard}
                   />
                 </div>
               </CardContent>
@@ -817,6 +859,8 @@ window.QuickBot.destroy('a1b2c3d4-e5f6-7890-abcd-ef1234567890');`}
                     code={`<!-- After loading the script, you can use the custom element -->
 <quick-bot bot-id="YOUR_BOT_ID"></quick-bot>`}
                     id="custom-element"
+                    copiedCode={copiedCode}
+                    onCopy={copyToClipboard}
                   />
                 </div>
                 <div className="bg-muted/50 p-4 rounded-lg">
@@ -925,6 +969,8 @@ window.QuickBot.destroy('a1b2c3d4-e5f6-7890-abcd-ef1234567890');`}
 </html>
 `}
                   id="dark-mode"
+                  copiedCode={copiedCode}
+                  onCopy={copyToClipboard}
                 />
               </CardContent>
             </Card>

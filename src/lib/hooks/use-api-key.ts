@@ -36,7 +36,7 @@ export function useApiKeyActions() {
     if (!parsed.success) {
       return {
         ok: false,
-        message: parsed.error.errors[0]?.message || "Invalid input",
+        message: parsed.error.issues[0]?.message || "Invalid input",
       };
     }
 

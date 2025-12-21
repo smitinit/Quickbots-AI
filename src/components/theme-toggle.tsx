@@ -9,14 +9,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useEffect, useState } from "react";
+import { useEffect, useState, startTransition } from "react";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    startTransition(() => {
+      setMounted(true);
+    });
   }, []);
 
   if (!mounted) {

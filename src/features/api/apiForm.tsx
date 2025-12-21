@@ -26,6 +26,53 @@ import { Button } from "@/components/ui/button";
 const CDN_URL =
   "https://quickbot-ai.smit090305.workers.dev/v1/quickbot.iife.js";
 
+interface CodeBlockProps {
+  code: string;
+  id: string;
+  title?: string;
+  copiedSection: string | null;
+  onCopy: (text: string, section: string) => void;
+}
+
+const CodeBlock = ({
+  code,
+  id,
+  title,
+  copiedSection,
+  onCopy,
+}: CodeBlockProps) => (
+  <div className="space-y-2">
+    {title && (
+      <div className="flex items-center justify-between">
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          {title}
+        </label>
+        <button
+          onClick={() => onCopy(code, id)}
+          className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors"
+        >
+          {copiedSection === id ? (
+            <>
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Copied
+            </>
+          ) : (
+            <>
+              <Copy className="h-3.5 w-3.5" />
+              Copy
+            </>
+          )}
+        </button>
+      </div>
+    )}
+    <pre className="bg-muted/50 border border-border/50 rounded-lg p-4 overflow-x-auto">
+      <code className="text-xs font-mono text-foreground whitespace-pre">
+        {code}
+      </code>
+    </pre>
+  </div>
+);
+
 export default function ApiConfig() {
   const { bot } = useBotData();
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
@@ -41,47 +88,6 @@ export default function ApiConfig() {
       toast.error("Failed to copy");
     }
   };
-
-  const CodeBlock = ({
-    code,
-    id,
-    title,
-  }: {
-    code: string;
-    id: string;
-    title?: string;
-  }) => (
-    <div className="space-y-2">
-      {title && (
-        <div className="flex items-center justify-between">
-          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            {title}
-          </label>
-          <button
-            onClick={() => copyToClipboard(code, id)}
-            className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors"
-          >
-            {copiedSection === id ? (
-              <>
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                Copied
-              </>
-            ) : (
-              <>
-                <Copy className="h-3.5 w-3.5" />
-                Copy
-              </>
-            )}
-          </button>
-        </div>
-      )}
-      <pre className="bg-muted/50 border border-border/50 rounded-lg p-4 overflow-x-auto">
-        <code className="text-xs font-mono text-foreground whitespace-pre">
-          {code}
-        </code>
-      </pre>
-    </div>
-  );
 
   const scriptTagCode = `<script
   src="${CDN_URL}"
@@ -292,7 +298,7 @@ export class AppComponent implements OnInit, OnDestroy {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <CodeBlock code={scriptTagCode} id="script-tag" title="Script Tag" />
+          <CodeBlock code={scriptTagCode} id="script-tag" title="Script Tag" copiedSection={copiedSection} onCopy={copyToClipboard} />
           <div className="bg-muted/50 p-4 rounded-lg">
             <p className="text-xs font-semibold text-foreground mb-1">
               📝 Note:
@@ -331,6 +337,8 @@ export class AppComponent implements OnInit, OnDestroy {
                 code={htmlExample}
                 id="html-example"
                 title="HTML Example"
+                copiedSection={copiedSection}
+                onCopy={copyToClipboard}
               />
             </TabsContent>
 
@@ -339,6 +347,8 @@ export class AppComponent implements OnInit, OnDestroy {
                 code={reactExample}
                 id="react-example"
                 title="React Example"
+                copiedSection={copiedSection}
+                onCopy={copyToClipboard}
               />
             </TabsContent>
 
@@ -351,6 +361,8 @@ export class AppComponent implements OnInit, OnDestroy {
                   code={nextjsScriptExample}
                   id="nextjs-script"
                   title="Next.js Script"
+                  copiedSection={copiedSection}
+                  onCopy={copyToClipboard}
                 />
               </div>
               <div>
@@ -361,6 +373,8 @@ export class AppComponent implements OnInit, OnDestroy {
                   code={nextjsComponentExample}
                   id="nextjs-component"
                   title="Next.js Component"
+                  copiedSection={copiedSection}
+                  onCopy={copyToClipboard}
                 />
               </div>
             </TabsContent>
@@ -370,6 +384,8 @@ export class AppComponent implements OnInit, OnDestroy {
                 code={vueExample}
                 id="vue-example"
                 title="Vue Example"
+                copiedSection={copiedSection}
+                onCopy={copyToClipboard}
               />
             </TabsContent>
 
@@ -378,6 +394,8 @@ export class AppComponent implements OnInit, OnDestroy {
                 code={angularExample}
                 id="angular-example"
                 title="Angular Example"
+                copiedSection={copiedSection}
+                onCopy={copyToClipboard}
               />
             </TabsContent>
           </Tabs>

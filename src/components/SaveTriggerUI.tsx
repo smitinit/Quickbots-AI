@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Check } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, startTransition } from "react";
 import { Spinner } from "./ui/spinner";
 
 interface SaveTriggerUIProps {
@@ -25,22 +25,30 @@ export default function SaveTriggerUI({
 
   useEffect(() => {
     if (isDirty) {
-      setIsVisible(true);
-      setShowSuccess(false);
+      startTransition(() => {
+        setIsVisible(true);
+        setShowSuccess(false);
+      });
       return;
     }
 
     if (!isDirty && isVisible && !isSubmitting && !isPendingUpdate) {
-      setShowSuccess(true);
+      startTransition(() => {
+        setShowSuccess(true);
+      });
 
       // Let success state be visible for a while
       const successTimer = setTimeout(() => {
         // Trigger exit animation only
-        setIsVisible(false);
+        startTransition(() => {
+          setIsVisible(false);
+        });
 
         // Reset internal state AFTER animation finishes
         const cleanupTimer = setTimeout(() => {
-          setShowSuccess(false);
+          startTransition(() => {
+            setShowSuccess(false);
+          });
         }, 300); // Wait for CSS transition to complete
 
         return () => clearTimeout(cleanupTimer);

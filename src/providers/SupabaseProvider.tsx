@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  startTransition,
+} from "react";
 import { useSession } from "@clerk/nextjs";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
@@ -35,8 +42,10 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!client) return;
 
-    setSupabase(client);
-    setIsReady(true);
+    startTransition(() => {
+      setSupabase(client);
+      setIsReady(true);
+    });
   }, [client]);
 
   return (

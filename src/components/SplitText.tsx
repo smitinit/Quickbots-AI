@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, startTransition } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText as GSAPSplitText } from 'gsap/SplitText';
@@ -43,10 +43,14 @@ const SplitText: React.FC<SplitTextProps> = ({
 
   useEffect(() => {
     if (document.fonts.status === 'loaded') {
-      setFontsLoaded(true);
+      startTransition(() => {
+        setFontsLoaded(true);
+      });
     } else {
       document.fonts.ready.then(() => {
-        setFontsLoaded(true);
+        startTransition(() => {
+          setFontsLoaded(true);
+        });
       });
     }
   }, []);

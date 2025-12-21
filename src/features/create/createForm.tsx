@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, startTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,8 +45,10 @@ export default function BotForm() {
     if (result.ok && result.data?.bot_id) {
       const botId = result.data.bot_id;
       reset();
-      // Use window.location for hard navigation to ensure modal closes
-      window.location.href = `/bots/${botId}/configure`;
+      // Use router.push with startTransition for navigation
+      startTransition(() => {
+        router.push(`/bots/${botId}/configure`);
+      });
       return;
     }
     setIsPending(false);
