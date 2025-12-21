@@ -29,10 +29,6 @@ export default function Error({ error }: ErrorProps) {
         head back to the dashboard.
       </p>
 
-      <div className="w-full max-w-xl bg-muted p-4 rounded-md text-sm text-left overflow-x-auto border border-border text-red-700">
-        <code>{error.message}</code>
-      </div>
-
       {error.digest && (
         <p className="text-xs text-muted-foreground mt-2">
           Error reference: <span className="font-mono">{error.digest}</span>

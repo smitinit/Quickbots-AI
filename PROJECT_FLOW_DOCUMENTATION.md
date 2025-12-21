@@ -304,29 +304,39 @@ User updates UI settings in Preview Form
 - Provides bot context to children
 - Exposes refetch function on window object
 
-### 3. **Chatbot** (`packages/quickbot/src/Chatbot.tsx`)
+### 3. **QuickBotWidget** (`packages/quickbot/src/QuickBotWidget.ts`)
+
+- Web Component (custom element `<quick-bot>`)
+- Creates Shadow DOM for style isolation
+- Injects CSS styles
+- Observes dark mode changes on parent page
+- Renders React Chatbot component
+
+### 4. **Chatbot** (`packages/quickbot/src/Chatbot.tsx`)
 
 - Main widget component
 - Fetches and validates config
 - Subscribes to realtime updates
 - Renders ChatbotPreview
 
-### 4. **ChatbotPreview** (`packages/quickbot/src/ChatbotPreview.tsx`)
+### 5. **ChatbotPreview** (`packages/quickbot/src/ChatbotPreview.tsx`)
 
 - Renders chat UI (floating button, windows)
 - Handles auto-open, auto-greet
 - Manages email prompt flow
 - Position and theme styling
 
-### 5. **ChatInterface** (`packages/quickbot/src/ChatInterface.tsx`)
+### 6. **ChatInterface** (`packages/quickbot/src/ChatInterface.tsx`)
 
 - Core chat functionality
 - Message display and input
-- File upload, emoji picker
+- File upload, emoji picker (with dark mode support)
 - Markdown rendering
 - Timestamp display
+- Auto-scroll on open and streaming completion
+- Chat history persistence (sessionStorage)
 
-### 6. **PreviewFormLayout** (`src/features/preview/previewFormLayout.tsx`)
+### 7. **PreviewFormLayout** (`src/features/preview/previewFormLayout.tsx`)
 
 - Form for editing UI settings
 - Live preview of chatbot
@@ -416,10 +426,11 @@ React Components (camelCase)
 
 ```
 1. Widget requests config from /api/config/[bot_id]
-2. Server signs payload with private key
-3. Widget verifies signature with public key
-4. No user authentication required for widget
-5. Signature ensures config integrity
+2. API base URL is hardcoded (http://localhost:3000)
+3. Server signs payload with private key
+4. Widget verifies signature with public key
+5. No user authentication required for widget
+6. Signature ensures config integrity
 ```
 
 ### API Key Authentication
@@ -436,22 +447,55 @@ React Components (camelCase)
 
 ## 🤖 Chatbot Widget Flow
 
+### CDN Integration
+
+The widget can be integrated via three methods:
+
+1. **Script Tag Auto-Mount**:
+   ```html
+   <script src="CDN_URL" data-bot-id="BOT_ID" defer></script>
+   ```
+   - Automatically creates `<quick-bot>` element
+   - API base URL is hardcoded (no need to specify)
+
+2. **Custom Element**:
+   ```html
+   <quick-bot bot-id="BOT_ID"></quick-bot>
+   ```
+   - Manual placement
+   - Requires script to be loaded first
+
+3. **JavaScript API**:
+   ```javascript
+   window.QuickBot.init({ botId: 'BOT_ID' });
+   ```
+   - Programmatic initialization
+   - Can specify custom container
+
 ### Initialization
 
 ```
-1. <QuickBot botId="..." /> mounts
-2. useEffect fetches config:
+1. Widget loads via script tag or custom element <quick-bot>
+2. QuickBotWidget (Web Component) initializes:
+   - Creates Shadow DOM (mode: "open")
+   - Injects CSS styles into Shadow DOM
+   - Sets up dark mode observer (MutationObserver)
+   - Detects dark mode from parent page's <html> element
+3. Chatbot component mounts within Shadow DOM
+4. useEffect fetches config:
    - Calls fetchBotConfig(botId)
    - GET /api/config/[bot_id]
-3. Validates response:
+   - API base URL is hardcoded to http://localhost:3000
+5. Validates response:
    - Zod schema validation
    - ECDSA signature verification
-4. Transforms data:
+6. Transforms data:
    - snake_case → camelCase
    - Adds theme pack
-5. Sets uiSettings state
-6. Subscribes to realtime updates
-7. Renders ChatbotPreview
+7. Sets uiSettings state
+8. Subscribes to realtime updates
+9. Renders ChatbotPreview
+10. Auto-scrolls to bottom on initial load
 ```
 
 ### User Interaction
@@ -459,16 +503,19 @@ React Components (camelCase)
 ```
 1. User clicks floating button
 2. Chat opens (if autoOpenDelayMs > 0, auto-opens)
-3. If autoGreetOnOpen: shows welcome message
-4. If askEmailBeforeChat:
+3. Auto-scrolls to bottom when opened
+4. If autoGreetOnOpen: shows welcome message
+5. If askEmailBeforeChat:
    - User can send message first
    - Then prompted for email
    - Email validated with regex
-5. User types message
-6. Message sent to /api/chat/[bot_id]
-7. Response streamed back
-8. Message displayed with markdown
-9. If showTimestamps: timestamp shown
+6. User types message
+7. Message sent to /api/chat/[bot_id]
+8. Response streamed back
+9. Message displayed with markdown
+10. Auto-scrolls to bottom when streaming completes
+11. If showTimestamps: timestamp shown
+12. Chat history persisted to sessionStorage
 ```
 
 ### Features
@@ -477,11 +524,14 @@ React Components (camelCase)
 - **Auto-greet**: Shows welcome message on open
 - **Email prompt**: Collects email before chat (if enabled)
 - **File upload**: Images and files supported
-- **Emoji picker**: Always enabled
+- **Emoji picker**: Always enabled (with dark mode support)
 - **Markdown**: Always enabled
 - **Timestamps**: Optional display
 - **Quick questions**: Clickable preset questions
 - **Themes**: 5 themes (modern, classic, minimal, bubble, retro)
+- **Auto-scroll**: Automatically scrolls to bottom on open and when streaming completes
+- **Chat persistence**: Uses sessionStorage for chat history (7-day retention)
+- **Dark mode**: Automatically detects `class="dark"` on `<html>` element
 
 ---
 
@@ -554,6 +604,8 @@ React Components (camelCase)
 - No authentication required (public endpoint)
 - Whitelist prevents unauthorized fields
 
+**Note**: Widget uses hardcoded API base URL (`http://localhost:3000`). Update in production.
+
 ### POST `/api/chat/[bot_id]`
 
 **Purpose**: Handles chat messages and streams AI responses
@@ -611,14 +663,17 @@ quick-bot-ai/
 └── packages/
     └── quickbot/              # Chatbot widget package
         ├── src/
+        │   ├── QuickBotWidget.ts  # Web Component
         │   ├── Chatbot.tsx
         │   ├── ChatbotPreview.tsx
-        │   └── ChatInterface.tsx
+        │   ├── ChatInterface.tsx
+        │   └── index.ts       # CDN entry point
         └── lib/
             ├── api/            # API client
             ├── crypto/         # Signature verification
             ├── realtime/       # Realtime subscriptions
             ├── themes/         # Theme packs
+            ├── utils/          # Utilities (chat session, transformers)
             └── validators.tsx  # Zod schemas
 ```
 
@@ -642,7 +697,12 @@ NEXT_PUBLIC_QUICKBOT_PUBLIC_KEY=
 
 # Google AI
 GOOGLE_GENERATIVE_AI_API_KEY=
+
+# CDN (Production)
+CDN_URL=https://quickbot-ai.smit090305.workers.dev/v1/quickbot.iife.js
 ```
+
+**Note**: The widget's API base URL is hardcoded in `packages/quickbot/src/index.ts` as `http://localhost:3000`. Update this constant for production deployments.
 
 ---
 
@@ -661,20 +721,31 @@ Each theme has predefined colors:
 ### Theme Properties
 
 - `backgroundColor`: Chat background
-- `headerColor`: Header background
+- `headerColor`: Header background (with decorative clip-path)
 - `accentColor`: User message bubbles
 - `textColor`: Text color
 - `borderColor`: Border colors
+
+### Dark Mode
+
+- Automatically detects `class="dark"` on `<html>` element
+- Uses MutationObserver to watch for theme changes
+- Applies dark theme styles within Shadow DOM
+- Emoji picker adapts to dark mode automatically
 
 ---
 
 ## 🚀 Deployment Considerations
 
 1. **Monorepo**: Build `@qb/quickbot` package before deploying
-2. **Environment Variables**: All keys must be set
-3. **Clerk Template**: Must have "supabase" JWT template
-4. **Supabase RLS**: Policies must allow authenticated access
-5. **Realtime**: Must be enabled on `bot_ui_settings` table
+2. **CDN Build**: Widget is built as IIFE for CDN deployment
+3. **CDN URL**: `https://quickbot-ai.smit090305.workers.dev/v1/quickbot.iife.js`
+4. **API Base URL**: Hardcoded to `http://localhost:3000` (update for production)
+5. **Environment Variables**: All keys must be set
+6. **Clerk Template**: Must have "supabase" JWT template
+7. **Supabase RLS**: Policies must allow authenticated access
+8. **Realtime**: Must be enabled on `bot_ui_settings` table
+9. **Web Components**: Uses native Shadow DOM for style isolation
 
 ---
 
@@ -696,13 +767,34 @@ This is a **multi-tenant SaaS platform** for AI chatbots with:
 - ✅ **Database** via Supabase (PostgreSQL)
 - ✅ **Realtime updates** via Supabase Realtime
 - ✅ **AI chat** via Google Gemini
-- ✅ **Embeddable widget** via `@qb/quickbot` package
+- ✅ **Embeddable widget** via Web Component (`<quick-bot>`)
+- ✅ **CDN deployment** via IIFE build
 - ✅ **Secure config** via ECDSA signatures
 - ✅ **Multi-tenant** via user_id isolation
+- ✅ **Dark mode** automatic detection
+- ✅ **Chat persistence** via sessionStorage
 
 The architecture separates concerns:
 
 - **Main app**: Bot management UI
-- **Widget package**: Standalone chatbot widget
+- **Widget package**: Standalone chatbot widget (Web Component)
 - **API routes**: Server-side logic
 - **Realtime**: Live configuration updates
+- **CDN**: Script tag auto-mount or programmatic API
+
+### Widget Integration Methods
+
+1. **Script Tag** (Auto-mount):
+   ```html
+   <script src="CDN_URL" data-bot-id="BOT_ID" defer></script>
+   ```
+
+2. **Custom Element**:
+   ```html
+   <quick-bot bot-id="BOT_ID"></quick-bot>
+   ```
+
+3. **JavaScript API**:
+   ```javascript
+   window.QuickBot.init({ botId: 'BOT_ID' });
+   ```

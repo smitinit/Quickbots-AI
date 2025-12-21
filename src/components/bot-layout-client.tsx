@@ -139,26 +139,26 @@ export default function BotLayoutClient({
 
   return (
     <>
-      <div className="bg-background max-w-[90rem] mx-auto">
+      <div className="bg-background max-w-[90rem] mx-auto overflow-x-hidden">
         <BotProvider initials={data}>
           <ContextUpdater botId={botId} />
 
-          <div className="flex gap-4">
+          <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 px-2 sm:px-4 lg:px-6">
             {/* Sidebar */}
-            <div className="hidden lg:flex lg:flex-col lg:w-[22rem] xl:w-sm">
+            <div className="hidden lg:flex lg:flex-col lg:w-[22rem] xl:w-sm lg:shrink-0">
               <BotManagementDashboard bot={data.bot} />
             </div>
 
             {/* Page content */}
-            <div className="flex-1 space-y-6">
+            <div className="flex-1 min-w-0 space-y-4 sm:space-y-5 md:space-y-6">
               <TabsNavigation
                 slug={botId}
                 enableMobileAnalytics
                 onOpenAnalytics={() => setIsAnalyticsOpen(true)}
               />
 
-              <main className="flex-1 p-2">
-                <div className="max-w-7xl mx-auto">{children}</div>
+              <main className="flex-1 p-2 sm:p-3 md:p-4">
+                <div className="max-w-7xl mx-auto w-full">{children}</div>
               </main>
             </div>
           </div>

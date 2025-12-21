@@ -69,7 +69,7 @@ const powerFeatures: PowerFeature[] = [
     id: "feature-2",
     title: "Embeddable QuickBots Widget",
     description:
-      "Drop-in React component (`@qb/quickbot`) for instant website chat, complete with session history, file uploads, and theming that matches your product.",
+      "Add a single script tag to embed a fully-featured chatbot widget. Works with any framework, automatically adapts to dark mode, and includes session history, file uploads, and seamless theming.",
     image: feature2,
     icon: <Bot className="h-5 w-5" />,
   },
@@ -104,9 +104,9 @@ const featureItems: FeatureItem[] = [
   },
   {
     id: 4,
-    title: "Embeddable Experience Kit",
+    title: "Universal Web Component Widget",
     description:
-      "Install the QuickBots widget package or export raw config to drop into mobile apps, Next.js sites, or custom React shells with full theming support.",
+      "Embed the QuickBots widget with a single script tag. Works with HTML, React, Next.js, Vue, Angular, or any framework. Automatically detects dark mode and provides a seamless chat experience with auto-scroll and session persistence.",
   },
   {
     id: 5,
@@ -172,7 +172,7 @@ const Hero = memo(function Hero() {
             </motion.div>
 
             <div className="text-center space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6 xl:space-y-8">
-              <div className="mx-auto max-w-5xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight tracking-tight text-primary ">
+              <div className="mx-auto max-w-5xl text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold leading-tight tracking-tight text-primary px-2 sm:px-0">
                 <SplitText
                   text="Launch customer-ready AI chatbots faster with QuickBots"
                   className="inline-block text-inherit"
@@ -190,34 +190,34 @@ const Hero = memo(function Hero() {
               </div>
               <p className="mx-auto max-w-3xl text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-muted-foreground leading-relaxed">
                 Onboard teams with AI-assist, manage runtime limits, and embed
-                QuickBots widgets without rebuilding your stack.
+                QuickBots widgets with a single script tag—works with any framework.
               </p>
 
               <p className="mx-auto max-w-4xl text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-muted-foreground leading-relaxed">
-                Guided onboarding, a managed runtime, and an embeddable widget
+                Guided onboarding, a managed runtime, and a universal Web Component widget
                 so product, support, and growth teams can ship AI experiences
                 without rebuilding infrastructure.
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3 justify-center  pt-2 sm:pt-3 md:pt-4 lg:pt-5 xl:pt-6">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 justify-center pt-2 sm:pt-3 md:pt-4 lg:pt-5 xl:pt-6">
               <Button
                 size="lg"
-                className=" px-5 sm:px-6 md:px-7 lg:px-8 xl:px-10 py-3 sm:py-4 md:py-5 lg:py-6 xl:py-7 text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold shadow-lg hover:scale-105 transition-transform duration-200"
+                className="w-full sm:w-auto px-6 sm:px-6 md:px-7 lg:px-8 xl:px-10 py-2.5 sm:py-3 md:py-4 lg:py-5 xl:py-6 text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold shadow-lg hover:scale-105 transition-transform duration-200"
                 asChild
               >
-                <Link href="/bots" className="">
+                <Link href="/bots" className="flex items-center justify-center">
                   Start Building Free
-                  <ArrowRight className="ml-2 size-3.5 sm:size-4 md:size-5 lg:size-5 xl:size-6" />
+                  <ArrowRight className="ml-2 size-4 sm:size-4 md:size-5 lg:size-5 xl:size-6" />
                 </Link>
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className=" px-5 sm:px-6 md:px-7 lg:px-8 xl:px-10 py-3 sm:py-4 md:py-5 lg:py-6 xl:py-7 text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold hover:scale-105 transition-transform duration-200"
+                className="w-full sm:w-auto px-6 sm:px-6 md:px-7 lg:px-8 xl:px-10 py-2.5 sm:py-3 md:py-4 lg:py-5 xl:py-6 text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold hover:scale-105 transition-transform duration-200"
                 asChild
               >
-                <Link href="/docs" className="">
+                <Link href="/docs" className="flex items-center justify-center">
                   View Docs
                 </Link>
               </Button>
@@ -293,7 +293,8 @@ const PowerfulFeaturesSection = memo(function PowerfulFeaturesSection() {
               {[
                 "AI-assisted onboarding generates configs & personas automatically",
                 "Live runtime controls for rate limits, quotas, and models",
-                "Embeddable QuickBots widget with session history & file uploads",
+                "Universal Web Component widget - works with any framework",
+                "Auto dark mode detection, session history & file uploads",
                 "Analytics, guardrails, and audit trails for every bot",
               ].map((feature) => (
                 <div

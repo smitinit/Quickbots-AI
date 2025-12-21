@@ -168,7 +168,7 @@ export async function GET(
   } catch (err: unknown) {
     console.error("ANALYTICS ERROR:", err);
     return NextResponse.json(
-      { error: (err as Error).message ?? "Internal Server Error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

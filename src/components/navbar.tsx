@@ -19,33 +19,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Menu, Bot, BookOpenIcon } from "lucide-react";
-import Image from "next/image";
-import quickbotsIcon from "@/assets/quickbots-logo.png";
 
 export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/95 backdrop-blur-md supports-backdrop-filter:bg-background/80">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6">
+        <div className="flex h-14 sm:h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 z-10 group ">
-            <div className="h-10 w-10 flex items-center justify-center overflow-hidden ">
-              <Image
-                src={quickbotsIcon}
-                alt="QuickBots logo"
-                className="object-contain"
-                width={36}
-                height={36}
-                priority
-              />
-            </div>
-            <h1 className="font-getvoip text-lg font-bold text-foreground tracking-wide">
-              QUICK BOTS
+          <Link
+            href="/"
+            className="flex items-center z-10 group relative"
+          >
+            <h1 className="font-getvoip text-sm sm:text-base md:text-lg font-bold text-foreground tracking-wide relative">
+              <span className="absolute -top-2 sm:-top-3 -right-8 sm:-right-10 bg-primary text-primary-foreground text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.5 leading-tight rounded-md shadow-md uppercase tracking-wider">
+                BETA
+              </span>
+              <span className="hidden sm:inline">QUICKBOTS AI</span>
+              <span className="sm:hidden">QUICKBOTS</span>
             </h1>
           </Link>
 
           {/* Right side actions */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
             {/* Dashboard button - visible on desktop for signed-in users */}
             <SignedIn>
               <Button

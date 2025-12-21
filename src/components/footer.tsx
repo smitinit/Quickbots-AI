@@ -58,19 +58,19 @@ const Footer = ({
   ],
 }: FooterProps) => {
   return (
-    <footer className="relative border-t border-border/30 bg-background  w-full">
-      <div className="container mx-auto px-4">
-        <div className="py-12">
+    <footer className="relative border-t border-border/30 bg-background w-full">
+      <div className="container mx-auto px-4 sm:px-6 md:px-8">
+        <div className="py-8 sm:py-10 md:py-12">
           {/* Main footer content */}
-          <div className="flex flex-col lg:flex-row gap-12 justify-between mb-8">
+          <div className="flex flex-col lg:flex-row gap-8 sm:gap-10 md:gap-12 justify-between mb-6 sm:mb-8">
             {/* Brand section */}
             <div className="shrink-0">
               <Link
                 href={logo.url}
-                className="flex items-center gap-2 mb-4 group"
+                className="flex items-center gap-2 mb-3 sm:mb-4 group"
               >
                 <div className="relative">
-                  <div className="flex h-8 w-8 items-center justify-center overflow-hidden">
+                  <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center overflow-hidden">
                     <Image
                       src={quickbotsIcon}
                       alt="QuickBots logo"
@@ -81,23 +81,23 @@ const Footer = ({
                     />
                   </div>
                 </div>
-                <span className="text-lg font-semibold text-foreground">
+                <span className="text-base sm:text-lg font-semibold text-foreground">
                   {logo.title}
                 </span>
               </Link>
 
-              <p className="text-sm text-muted-foreground leading-relaxed mb-6 max-w-xs">
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-4 sm:mb-6 max-w-xs">
                 {tagline}
               </p>
-              <div className="pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
+              <div className="pt-4 sm:pt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 text-xs text-muted-foreground">
                 <p>© 2025 {logo.title}. All rights reserved.</p>
               </div>
             </div>
 
             {/* ASCII art / vibe block */}
             <div className="hidden md:flex flex-1 items-center justify-center">
-              <div className="rounded-2xl px-4 py-6 sm:px-6 sm:py-8 flex items-center justify-center">
-                <pre className="text-[10px] sm:text-xs md:text-sm lg:text-base leading-tight font-mono text-primary text-center whitespace-pre">
+              <div className="rounded-2xl px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 flex items-center justify-center">
+                <pre className="text-[8px] sm:text-[10px] md:text-xs lg:text-sm leading-tight font-mono text-primary text-center whitespace-pre overflow-x-auto">
                   {`   ____        _      _    ____        _                  _____ 
   / __ \\      (_)    | |  |  _ \\      | |           /\\   |_   _|
  | |  | |_   _ _  ___| | _| |_) | ___ | |_ ___     /  \\    | |  
@@ -111,13 +111,13 @@ const Footer = ({
             </div>
 
             {/* Menu sections */}
-            <div className="flex gap-12">
+            <div className="flex flex-col sm:flex-row gap-8 sm:gap-10 md:gap-12">
               {menuItems.map((section, sectionIdx) => (
-                <div key={sectionIdx} className="space-y-4">
-                  <h3 className="text-sm font-semibold text-foreground">
+                <div key={sectionIdx} className="space-y-3 sm:space-y-4">
+                  <h3 className="text-xs sm:text-sm font-semibold text-foreground">
                     {section.title}
                   </h3>
-                  <ul className="space-y-2">
+                  <ul className="space-y-1.5 sm:space-y-2">
                     {section.links.map((link, linkIdx) => (
                       <li key={linkIdx}>
                         {link.url ? (

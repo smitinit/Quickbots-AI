@@ -270,9 +270,10 @@ export async function GET(
       },
     });
   } catch (err) {
+    console.error("CONFIG ROUTE ERROR:", err);
     return new NextResponse(
-      JSON.stringify({ error: "Internal server error", details: String(err) }),
-      { status: 500 }
+      JSON.stringify({ error: "Internal server error" }),
+      { status: 500, headers: corsHeaders(req) }
     );
   }
 }

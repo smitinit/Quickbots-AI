@@ -92,14 +92,14 @@ export default function BotManagementDashboard({ bot }: { bot: BotType }) {
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="p-6 space-y-8">
-        <Card className="border border-border/40 shadow-none bg-card hover:border-border/60 transition-colors duration-300">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4 flex-1 min-w-0">
-                <Avatar className="w-14 h-14 ring-2 ring-primary/15 shrink-0">
-                  <AvatarFallback className="bg-linear-to-br from-primary/90 to-primary text-primary-foreground font-semibold text-base">
+    <div className="h-full flex flex-col overflow-x-hidden">
+      <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-5 md:space-y-6">
+        <Card className="border border-border/50 shadow-sm bg-gradient-to-br from-card to-card/50 hover:shadow-md hover:border-primary/30 transition-all duration-300">
+          <CardHeader className="pb-3 sm:pb-4">
+            <div className="flex items-center justify-between gap-2 sm:gap-3 md:gap-4">
+              <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-1 min-w-0">
+                <Avatar className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 ring-2 ring-primary/20 shadow-md shrink-0">
+                  <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground font-bold text-sm sm:text-base md:text-lg">
                     {bot.name
                       .split(" ")
                       .map((n) => n[0])
@@ -108,118 +108,120 @@ export default function BotManagementDashboard({ bot }: { bot: BotType }) {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground text-lg truncate">
-                    {bot.name[0].toUpperCase() + bot.name.slice(1)}
+                  <h3 className="font-bold text-foreground text-base sm:text-lg md:text-xl truncate">
+                    {bot.name}
                   </h3>
-                  <div className="flex items-center gap-3 mt-2">
+                  <div className="flex items-center gap-2 sm:gap-3 mt-1 sm:mt-2">
                     <div className="flex items-center gap-1.5">
                       <div
                         className={cn(
-                          "w-2 h-2 rounded-full",
+                          "w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full shadow-sm",
                           isOnline
-                            ? "bg-green-500 animate-pulse"
+                            ? "bg-green-500 animate-pulse ring-2 ring-green-500/30"
                             : "bg-destructive"
                         )}
                       />
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                         {isOnline ? "Online" : "Offline"}
                       </p>
                     </div>
                   </div>
+                  {bot.description && (
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1 sm:mt-2 line-clamp-2">
+                      {bot.description}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {bot.description}
-            </p>
-          </CardContent>
         </Card>
 
         {/* KEY METRICS */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-md bg-primary/10">
-              <Activity className="w-4 h-4 text-primary" />
+        <div className="space-y-3 sm:space-y-4 md:space-y-5">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20">
+              <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
             </div>
-            <h4 className="font-semibold text-foreground text-base">
+            <h4 className="font-bold text-foreground text-base sm:text-lg">
               Key Metrics
             </h4>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {/* Conversations */}
-            <Card className="border border-border/40 shadow-none bg-card/50 hover:bg-card/70 transition-all duration-300 hover:border-border/60">
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Conversations
-                    </p>
-                    <div className="text-2xl font-bold text-foreground">
-                      {stats.total_conversations}
-                    </div>
+            <Card className="group border border-border/50 shadow-sm bg-gradient-to-br from-card to-card/80 hover:shadow-lg hover:border-blue-500/30 transition-all duration-300 hover:-translate-y-1 relative">
+              <CardContent className="p-4 sm:p-5 md:p-6">
+                <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-500/10 border border-blue-500/20 group-hover:scale-110 transition-transform duration-300">
+                    <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <div className="p-2.5 rounded-lg bg-blue-500/10">
-                    <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="space-y-1.5 sm:space-y-2 pr-10 sm:pr-12">
+                  <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Conversations
+                  </p>
+                  <div className="text-2xl sm:text-3xl font-bold text-foreground">
+                    {stats.total_conversations.toLocaleString()}
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Active Users */}
-            <Card className="border border-border/40 shadow-none bg-card/50 hover:bg-card/70 transition-all duration-300 hover:border-border/60">
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Active Users
-                    </p>
-                    <div className="text-2xl font-bold text-foreground">
-                      {stats.active_users}
-                    </div>
+            <Card className="group border border-border/50 shadow-sm bg-gradient-to-br from-card to-card/80 hover:shadow-lg hover:border-green-500/30 transition-all duration-300 hover:-translate-y-1 relative">
+              <CardContent className="p-4 sm:p-5 md:p-6">
+                <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-green-500/20 to-green-500/10 border border-green-500/20 group-hover:scale-110 transition-transform duration-300">
+                    <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600 dark:text-green-400" />
                   </div>
-                  <div className="p-2.5 rounded-lg bg-green-500/10">
-                    <Users className="w-5 h-5 text-green-600 dark:text-green-400" />
+                </div>
+                <div className="space-y-1.5 sm:space-y-2 pr-10 sm:pr-12">
+                  <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Active Users
+                  </p>
+                  <div className="text-2xl sm:text-3xl font-bold text-foreground">
+                    {stats.active_users.toLocaleString()}
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Avg Response Time */}
-            <Card className="border border-border/40 shadow-none bg-card/50 hover:bg-card/70 transition-all duration-300 hover:border-border/60">
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Avg Response Time
-                    </p>
-                    <div className="text-2xl font-bold text-foreground">
-                      {stats.avg_response_time_ms}ms
-                    </div>
+            <Card className="group border border-border/50 shadow-sm bg-gradient-to-br from-card to-card/80 hover:shadow-lg hover:border-orange-500/30 transition-all duration-300 hover:-translate-y-1 relative">
+              <CardContent className="p-4 sm:p-5 md:p-6">
+                <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-orange-500/20 to-orange-500/10 border border-orange-500/20 group-hover:scale-110 transition-transform duration-300">
+                    <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-600 dark:text-orange-400" />
                   </div>
-                  <div className="p-2.5 rounded-lg bg-orange-500/10">
-                    <Clock className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                </div>
+                <div className="space-y-1.5 sm:space-y-2 pr-10 sm:pr-12">
+                  <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Avg Response Time
+                  </p>
+                  <div className="text-2xl sm:text-3xl font-bold text-foreground">
+                    {stats.avg_response_time_ms >= 1000
+                      ? `${(stats.avg_response_time_ms / 1000).toFixed(1)}s`
+                      : `${stats.avg_response_time_ms}ms`}
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Success Rate */}
-            <Card className="border border-border/40 shadow-none bg-card/50 hover:bg-card/70 transition-all duration-300 hover:border-border/60">
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Success Rate
-                    </p>
-                    <div className="text-2xl font-bold text-foreground">
-                      {stats.success_rate}%
-                    </div>
+            <Card className="group border border-border/50 shadow-sm bg-gradient-to-br from-card to-card/80 hover:shadow-lg hover:border-purple-500/30 transition-all duration-300 hover:-translate-y-1 relative">
+              <CardContent className="p-4 sm:p-5 md:p-6">
+                <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-purple-500/10 border border-purple-500/20 group-hover:scale-110 transition-transform duration-300">
+                    <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-600 dark:text-purple-400" />
                   </div>
-                  <div className="p-2.5 rounded-lg bg-purple-500/10">
-                    <Zap className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div className="space-y-1.5 sm:space-y-2 pr-10 sm:pr-12">
+                  <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Success Rate
+                  </p>
+                  <div className="text-2xl sm:text-3xl font-bold text-foreground">
+                    {stats.success_rate.toFixed(1)}%
                   </div>
                 </div>
               </CardContent>
@@ -228,32 +230,46 @@ export default function BotManagementDashboard({ bot }: { bot: BotType }) {
         </div>
 
         {/* SYSTEM HEALTH */}
-        <Card className="border border-border/40 shadow-none bg-card">
-          <CardHeader className="pb-5 border-b border-border/30">
-            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2.5">
-              <div className="p-1.5 rounded-md bg-primary/10">
-                <Activity className="w-4 h-4 text-primary" />
+        <Card className="border border-border/50 shadow-sm bg-gradient-to-br from-card to-card/50 hover:shadow-md transition-all duration-300">
+          <CardHeader className="pb-3 sm:pb-4 md:pb-5 border-b border-border/40">
+            <CardTitle className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20">
+                <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               </div>
               System Health
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-6 space-y-6">
+          <CardContent className="pt-4 sm:pt-5 md:pt-6 space-y-4 sm:space-y-5 md:space-y-6">
             {/* Token Usage */}
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-muted-foreground">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex justify-between items-center gap-2">
+                <span className="text-xs sm:text-sm font-semibold text-muted-foreground">
                   Tokens Used
                 </span>
-                <span className="text-sm font-semibold text-foreground">
-                  {stats.tokens_used}
+                <span className="text-base sm:text-lg font-bold text-foreground">
+                  {stats.tokens_used.toLocaleString()}
                 </span>
               </div>
-              <Progress
-                value={stats.tokens_used_percent}
-                className="h-2 bg-muted/40"
-              />
-              <div className="text-xs text-muted-foreground pt-1">
-                {stats.tokens_used} / {stats.tokens_limit} tokens
+              <div className="relative">
+                <Progress
+                  value={stats.tokens_used_percent}
+                  className="h-2 sm:h-3 bg-muted/50"
+                />
+                <div
+                  className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/60 to-primary opacity-20"
+                  style={{
+                    width: `${Math.min(stats.tokens_used_percent, 100)}%`,
+                  }}
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-0 text-xs sm:text-sm">
+                <span className="text-muted-foreground font-medium">
+                  {stats.tokens_used.toLocaleString()} /{" "}
+                  {stats.tokens_limit.toLocaleString()} tokens
+                </span>
+                <span className="text-muted-foreground font-semibold">
+                  {stats.tokens_used_percent.toFixed(1)}%
+                </span>
               </div>
             </div>
           </CardContent>

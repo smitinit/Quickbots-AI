@@ -67,7 +67,7 @@ export const DEFAULT_BOT_RUNTIME_SETTINGS = {
 
 export const DEFAULT_BOT_UI_SETTINGS = {
   theme: "modern",
-  chatbot_name: "SmartManage Assistant",
+  chatbot_name: "Smart Assistant",
   welcome_message:
     "Welcome! I'm here to assist with any business or product questions. How can I help you today?",
   quick_questions: [

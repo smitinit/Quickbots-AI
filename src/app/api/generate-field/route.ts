@@ -384,7 +384,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("FIELD GENERATION ERROR:", err);
     return NextResponse.json(
-      { error: "Failed to generate field" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

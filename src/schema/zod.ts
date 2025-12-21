@@ -97,7 +97,7 @@ export const previewSchema = z.object({
   chatbotName: z
     .string()
     .min(1, "Chatbot name is required")
-    .max(10, "Chatbot name cannot be greater than 10 letters."),
+    .max(15, "Chatbot name cannot be greater than 10 letters."),
   welcomeMessage: z.string().min(1, "Welcome message is required"),
   quickQuestions: z.array(z.string()).max(5, "Maximum 5 quick questions"),
   supportInfo: z.string().nullable(),
