@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { ChatOllama } from "@langchain/ollama";
+
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { StructuredOutputParser } from "@langchain/core/output_parsers";
+
 import { getBotProfile, lookupApiKey } from "@/lib/db/bot-queries";
 import { buildSystemPrompt } from "@/lib/llm/system-prompt-builder";
 import { logChat } from "@/lib/db/chat-logs";
@@ -9,269 +14,271 @@ import { isObviousGibberish } from "@/lib/validation/gibberish-detector";
 export const runtime = "nodejs";
 
 /* ---------------------------------------------
-   Validation Schemas
+   Schemas
 --------------------------------------------- */
-const BotIdSchema = z.object({
+
+const ParamsSchema = z.object({
   bot_id: z.string().min(1),
 });
 
-const ChatHistoryEntrySchema = z.object({
-  role: z.enum(["user", "assistant", "system"]),
-  content: z.string(),
-  timestamp: z.string(),
-});
-
-const ChatPayloadSchema = z.object({
+const RequestSchema = z.object({
   message: z.string().min(1),
-  chat_history: z.array(ChatHistoryEntrySchema).default([]),
+  chat_history: z
+    .array(
+      z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string(),
+      })
+    )
+    .default([]),
   model_override: z.string().optional(),
 });
 
-/* ---------------------------------------------
-   CORS - Allow all origins (dev and prod)
---------------------------------------------- */
-function corsHeaders() {
-  return {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Session-Id",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-  };
-}
+/* LLM RESPONSE CONTRACT */
+const LLMResponseSchema = z.object({
+  answer: z.string(),
+  suggestedQuestions: z.array(z.string().endsWith("?")).min(2).max(3),
+});
 
 /* ---------------------------------------------
-   OPTIONS Preflight
+   CORS
 --------------------------------------------- */
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Session-Id",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 export function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: corsHeaders(),
-  });
+  return new NextResponse(null, { status: 204, headers: corsHeaders });
 }
 
 /* ---------------------------------------------
-   Route Handler
+   POST Handler
 --------------------------------------------- */
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ bot_id: string }> }
 ) {
   const startTs = Date.now();
-  let finalText = "";
-  const supabaseAdmin = getSupabaseAdmin();
+  const supabase = getSupabaseAdmin();
 
   try {
-    /* ---------------------------------------------
-       1. Validate bot id + session
-    --------------------------------------------- */
-    const { bot_id } = BotIdSchema.parse(await params);
+    /* 1. Params + headers */
+    const { bot_id } = ParamsSchema.parse(await params);
 
     const sessionId = req.headers.get("x-session-id");
     if (!sessionId) {
       return NextResponse.json(
-        { error: "Session ID is required (x-session-id header)" },
-        { status: 400, headers: corsHeaders() }
+        { error: "x-session-id header required" },
+        { status: 400, headers: corsHeaders }
       );
     }
 
-    /* ---------------------------------------------
-       2. Parse request body
-    --------------------------------------------- */
-    const parsed = ChatPayloadSchema.parse(await req.json());
+    /* 2. Body */
+    const body = RequestSchema.parse(await req.json());
 
-    /* ---------------------------------------------
-       3. Optional API-key auth
-    --------------------------------------------- */
+    /* 3. Optional API key */
     const auth = req.headers.get("authorization");
     if (auth?.toLowerCase().startsWith("bearer ")) {
       const token = auth.replace(/^bearer\s+/i, "").trim();
-      const apiKeyRow = await lookupApiKey(token);
+      const apiKey = await lookupApiKey(token);
 
-      if (!apiKeyRow || apiKeyRow.bot_id !== bot_id) {
-        return new NextResponse("Invalid API key", {
-          status: 401,
-          headers: corsHeaders(),
-        });
+      if (!apiKey || apiKey.bot_id !== bot_id) {
+        return NextResponse.json(
+          { error: "Invalid API key" },
+          { status: 401, headers: corsHeaders }
+        );
       }
     }
 
-    /* ---------------------------------------------
-       4. Gibberish guard
-    --------------------------------------------- */
-    if (isObviousGibberish(parsed.message)) {
+    /* 4. Gibberish guard */
+    if (isObviousGibberish(body.message)) {
       await logChat({
-        supabase: supabaseAdmin,
+        supabase,
         botId: bot_id,
         sessionId,
         role: "user",
-        message: parsed.message,
-        history: parsed.chat_history,
+        message: body.message,
+        history: body.chat_history.map((m) => ({
+          role: m.role,
+          content: m.content,
+          timestamp: new Date().toISOString(),
+        })),
       }).catch(() => {});
 
       return NextResponse.json(
-        {
-          error:
-            "I couldn't understand that. Please rephrase or add more context.",
-        },
-        { status: 400, headers: corsHeaders() }
+        { error: "Message not understandable. Please rephrase." },
+        { status: 400, headers: corsHeaders }
       );
     }
 
-    /* ---------------------------------------------
-       5. Load bot + system prompt
-    --------------------------------------------- */
+    /* 5. Bot + system prompt */
     const bot = await getBotProfile(bot_id);
     if (!bot) {
-      return new NextResponse("Bot not found", {
-        status: 404,
-        headers: corsHeaders(),
-      });
+      return NextResponse.json(
+        { error: "Bot not found" },
+        { status: 404, headers: corsHeaders }
+      );
     }
 
     const systemPrompt = buildSystemPrompt(bot);
 
-    /* ---------------------------------------------
-       6. Prepare messages
-    --------------------------------------------- */
-    const historyMessages = parsed.chat_history
-      .filter((h) => h.role !== "system")
-      .map((h) => ({
-        role: h.role === "user" ? "user" : "assistant",
-        content: h.content,
-      }));
+    /* 6. Structured output parser */
+    const parser = StructuredOutputParser.fromZodSchema(LLMResponseSchema);
 
-    const messages = [
-      { role: "system", content: systemPrompt },
-      ...historyMessages,
-      { role: "user", content: parsed.message },
-    ];
+    /* 7. Prompt template using fromMessages */
+    const formatInstructions = parser.getFormatInstructions();
 
-    /* ---------------------------------------------
-       7. Model selection
-    --------------------------------------------- */
+    // Escape curly braces in system prompt and format instructions
+    const escapeBraces = (text: string) =>
+      text.replace(/\{/g, "{{").replace(/\}/g, "}}");
+    const escapedSystemPrompt = escapeBraces(systemPrompt);
+    const escapedFormatInstructions = escapeBraces(formatInstructions);
+
+    // Very explicit JSON format instruction
+    const jsonFormatInstruction = `You MUST respond with ONLY a valid JSON object. No other text before or after.
+
+    ${escapedFormatInstructions}
+
+    Example of correct format:
+    {{"answer": "Your response text here", "suggestedQuestions": ["Question 1?", "Question 2?", "Question 3?"]}}
+
+    CRITICAL RULES:
+    - Start your response with {{ (opening brace)
+    - End your response with }} (closing brace)
+    - Do NOT include markdown code blocks like \`\`\`json
+    - Do NOT include any explanatory text
+    - Do NOT include the word "json" or "JSON" in your response
+    - The entire response must be valid JSON that can be parsed
+    - Include exactly 2-3 questions in suggestedQuestions array`;
+
+    const prompt = ChatPromptTemplate.fromMessages([
+      ["system", escapedSystemPrompt],
+      ["system", jsonFormatInstruction],
+      ...body.chat_history.map(
+        (m) => [m.role, escapeBraces(m.content)] as [string, string]
+      ),
+      ["user", "{input}"],
+    ]);
+
+    /* 8. Model selection */
     const ALLOWED_MODELS = [
       "llama3.1:8b",
       "llama3:8b",
       "mistral",
       "mixtral",
       "codellama",
-    ] as const;
+    ];
 
-    const model =
-      parsed.model_override &&
-      ALLOWED_MODELS.includes(
-        parsed.model_override as (typeof ALLOWED_MODELS)[number]
-      )
-        ? parsed.model_override
+    const modelName =
+      body.model_override && ALLOWED_MODELS.includes(body.model_override)
+        ? body.model_override
         : "llama3.1:8b";
 
-    /* ---------------------------------------------
-       8. Streaming call to Ollama
-    --------------------------------------------- */
-    const abortController = new AbortController();
-    req.signal.addEventListener("abort", () => abortController.abort());
-
-    const apiModelUrl = process.env.API_MODEL_URL;
-    const ollamaRes = await fetch(`${apiModelUrl}/api/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      signal: abortController.signal,
-      body: JSON.stringify({
-        model,
-        messages,
-        temperature: 0.7,
-        stream: true,
-      }),
+    const model = new ChatOllama({
+      baseUrl: process.env.API_MODEL_URL,
+      model: modelName,
+      temperature: 0.7,
     });
 
-    if (!ollamaRes.ok || !ollamaRes.body) {
-      throw new Error("Failed to connect to Ollama");
-    }
+    /* 9. Invoke with error handling */
+    const chain = prompt.pipe(model).pipe(parser);
 
-    const reader = ollamaRes.body.getReader();
-    const decoder = new TextDecoder();
-    const encoder = new TextEncoder();
-    let buffer = "";
+    let result: { answer: string; suggestedQuestions: string[] };
 
-    const stream = new ReadableStream({
-      async start(controller) {
+    try {
+      result = await chain.invoke({
+        input: body.message,
+      });
+    } catch (parseError: any) {
+      // If parsing fails, try to extract JSON from the response
+      const rawOutput = parseError?.llmOutput || "";
+
+      // Try to find JSON in the response
+      const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
         try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            buffer = lines.pop() || "";
-
-            for (const line of lines) {
-              if (!line.trim()) continue;
-
-              let chunk;
-              try {
-                chunk = JSON.parse(line);
-              } catch {
-                continue;
-              }
-
-              const content = chunk.message?.content;
-              if (content) {
-                finalText += content;
-                controller.enqueue(encoder.encode(content));
-              }
-
-              if (chunk.done === true) break;
-            }
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (parsed.answer && Array.isArray(parsed.suggestedQuestions)) {
+            result = {
+              answer: parsed.answer,
+              suggestedQuestions: parsed.suggestedQuestions
+                .filter(
+                  (q: unknown) => typeof q === "string" && q.endsWith("?")
+                )
+                .slice(0, 3),
+            };
+          } else {
+            throw new Error("Invalid structure");
           }
         } catch {
-          // swallow stream errors; logging happens below
-        } finally {
-          /* ---------------------------------------------
-             9. Guaranteed logging
-          --------------------------------------------- */
-          const responseTimeMs = Date.now() - startTs;
-          const tokensUsed = Math.ceil(finalText.length / 4);
-
-          await logChat({
-            supabase: supabaseAdmin,
-            botId: bot_id,
-            sessionId,
-            role: "user",
-            message: parsed.message,
-            history: parsed.chat_history,
-            model,
-          }).catch(() => {});
-
-          await logChat({
-            supabase: supabaseAdmin,
-            botId: bot_id,
-            sessionId,
-            role: "assistant",
-            message: finalText,
-            history: [],
-            tokensUsed,
-            responseTimeMs,
-            model,
-          }).catch(() => {});
-
-          controller.close();
+          // Fallback: use raw output as answer, generate empty questions
+          result = {
+            answer: rawOutput.trim(),
+            suggestedQuestions: [],
+          };
         }
-      },
-    });
+      } else {
+        // No JSON found, use raw output as answer
+        result = {
+          answer: rawOutput.trim(),
+          suggestedQuestions: [],
+        };
+      }
+    }
 
-    return new NextResponse(stream, {
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-        ...corsHeaders(),
+    /* 10. Logging */
+    const responseTimeMs = Date.now() - startTs;
+    const tokensUsed = Math.ceil(result.answer.length / 4);
+
+    await logChat({
+      supabase,
+      botId: bot_id,
+      sessionId,
+      role: "user",
+      message: body.message,
+      history: body.chat_history.map((m) => ({
+        role: m.role,
+        content: m.content,
+        timestamp: new Date().toISOString(),
+      })),
+      model: modelName,
+    }).catch(() => {});
+
+    await logChat({
+      supabase,
+      botId: bot_id,
+      sessionId,
+      role: "assistant",
+      message: result.answer,
+      history: [],
+      tokensUsed,
+      responseTimeMs,
+      model: modelName,
+    }).catch(() => {});
+
+    /* 11. Response */
+    return NextResponse.json(
+      {
+        answer: result.answer,
+        suggestedQuestions: result.suggestedQuestions,
       },
-    });
+      {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
+      }
+    );
   } catch (err) {
     console.error("CHAT ROUTE ERROR:", err);
 
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500, headers: corsHeaders() }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
