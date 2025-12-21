@@ -604,7 +604,7 @@ The widget can be integrated via three methods:
 - No authentication required (public endpoint)
 - Whitelist prevents unauthorized fields
 
-**Note**: Widget uses hardcoded API base URL (`http://localhost:3000`). Update in production.
+**Note**: Widget uses hardcoded API base URL (`https://quickbots-ai.vercel.app`).
 
 ### POST `/api/chat/[bot_id]`
 
@@ -702,7 +702,7 @@ GOOGLE_GENERATIVE_AI_API_KEY=
 CDN_URL=https://quickbot-ai.smit090305.workers.dev/v1/quickbot.iife.js
 ```
 
-**Note**: The widget's API base URL is hardcoded in `packages/quickbot/src/index.ts` as `http://localhost:3000`. Update this constant for production deployments.
+**Note**: The widget's API base URL is hardcoded in `quickbot/src/index.ts` as `https://quickbots-ai.vercel.app`.
 
 ---
 
@@ -740,7 +740,7 @@ Each theme has predefined colors:
 1. **Monorepo**: Build `@qb/quickbot` package before deploying
 2. **CDN Build**: Widget is built as IIFE for CDN deployment
 3. **CDN URL**: `https://quickbot-ai.smit090305.workers.dev/v1/quickbot.iife.js`
-4. **API Base URL**: Hardcoded to `http://localhost:3000` (update for production)
+4. **API Base URL**: Hardcoded to `https://quickbots-ai.vercel.app`
 5. **Environment Variables**: All keys must be set
 6. **Clerk Template**: Must have "supabase" JWT template
 7. **Supabase RLS**: Policies must allow authenticated access

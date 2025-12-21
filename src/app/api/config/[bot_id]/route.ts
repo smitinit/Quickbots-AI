@@ -141,32 +141,23 @@ import type { BotUiSettingsRow } from "@/types";
 export const runtime = "nodejs";
 
 /* -----------------------------------------------------------
-   Allowed CORS origins
-   For dev: allow everything
-   For prod: restrict to widget customer domains
+   CORS - Allow all origins (dev and prod)
 ----------------------------------------------------------- */
-const ALLOWED_ORIGINS = ["*", "http://localhost:3000", "http://127.0.0.1:5500"];
-
-function corsHeaders(req: NextRequest) {
-  const origin = req.headers.get("origin") || "*";
-  const allowed =
-    ALLOWED_ORIGINS.includes("*") || ALLOWED_ORIGINS.includes(origin);
-
+function corsHeaders() {
   return {
-    "Access-Control-Allow-Origin": allowed ? origin : "null",
+    "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
-    Vary: "Origin",
   };
 }
 
 /* -----------------------------------------------------------
    OPTIONS Preflight
 ----------------------------------------------------------- */
-export function OPTIONS(req: NextRequest) {
+export function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
-    headers: corsHeaders(req),
+    headers: corsHeaders(),
   });
 }
 
@@ -181,7 +172,7 @@ const BotIdSchema = z.object({
    GET Handler
 ----------------------------------------------------------- */
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ bot_id: string }> }
 ) {
   try {
@@ -192,7 +183,7 @@ export async function GET(
     if (!PRIVATE_KEY_RAW) {
       return new NextResponse(
         JSON.stringify({ error: "Missing QUICKBOT_PRIVATE_KEY_RAW" }),
-        { status: 500, headers: corsHeaders(req) }
+        { status: 500, headers: corsHeaders() }
       );
     }
 
@@ -210,7 +201,7 @@ export async function GET(
     if (!bot) {
       return new NextResponse(JSON.stringify({ error: "Bot not found" }), {
         status: 404,
-        headers: corsHeaders(req),
+        headers: corsHeaders(),
       });
     }
 
@@ -267,14 +258,14 @@ export async function GET(
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        ...corsHeaders(req),
+        ...corsHeaders(),
       },
     });
   } catch (err) {
     console.error("CONFIG ROUTE ERROR:", err);
     return new NextResponse(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: corsHeaders(req) }
+      { status: 500, headers: corsHeaders() }
     );
   }
 }

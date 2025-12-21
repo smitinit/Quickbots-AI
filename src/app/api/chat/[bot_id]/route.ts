@@ -28,7 +28,7 @@ const ChatPayloadSchema = z.object({
 });
 
 /* ---------------------------------------------
-   CORS (PUBLIC API – widget safe)
+   CORS - Allow all origins (dev and prod)
 --------------------------------------------- */
 function corsHeaders() {
   return {
