@@ -56,19 +56,19 @@ export default function BotForm() {
 
   const isLoading = isSubmitting || isPending;
   return (
-    <div className="flex justify-center items-center p-4">
-      <Card className="border-none shadow-none p-0 w-full max-w-4xl">
-        <CardHeader className="text-center pb-6">
-          <CardTitle className="text-2xl font-semibold">
+    <div className="flex justify-center items-center p-3 sm:p-4 w-full min-w-0 overflow-x-hidden">
+      <Card className="border-none shadow-none p-0 w-full max-w-4xl min-w-0">
+        <CardHeader className="text-center pb-4 sm:pb-6 px-3 sm:px-6">
+          <CardTitle className="text-xl sm:text-2xl font-semibold">
             Create New Quickbot Project
           </CardTitle>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm sm:text-base">
             Enter the project name and its description.
           </p>
         </CardHeader>
 
-        <CardContent>
-          <form onSubmit={onSubmit} className="space-y-6">
+        <CardContent className="px-3 sm:px-6">
+          <form onSubmit={onSubmit} className="space-y-4 sm:space-y-6 w-full min-w-0">
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Project Name</Label>

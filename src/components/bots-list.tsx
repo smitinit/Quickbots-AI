@@ -93,8 +93,8 @@ export default function BotsList() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto max-w-7xl px-4 sm:px-6 py-8">
+    <div className="min-h-screen bg-background w-full overflow-x-hidden">
+      <div className="container mx-auto max-w-7xl px-3 sm:px-4 md:px-6 py-6 sm:py-8 w-full min-w-0">
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-6">
             <div>
@@ -147,7 +147,7 @@ export default function BotsList() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 w-full min-w-0">
           {bots.length > 0 ? (
             bots.map((bot) => <BotCard key={bot.bot_id} bot={bot} />)
           ) : (

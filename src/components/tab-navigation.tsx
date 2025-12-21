@@ -94,13 +94,13 @@ export function TabsNavigation({
 
   return (
     <>
-      <div className="max-w-4xl mx-auto px-3 sm:px-4 md:px-6 pt-4 sm:pt-5 md:pt-6 overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        <Tabs value={activeTab} className={cn("w-full")}>
+      <div className="max-w-4xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 pt-4 sm:pt-5 md:pt-6 overflow-x-hidden w-full min-w-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <Tabs value={activeTab} className={cn("w-full min-w-0")}>
           <TabsList
             className={cn(
               "flex items-center rounded-xl bg-muted px-1 sm:px-2 py-1.5 sm:py-2 border-border border",
               "gap-1 sm:gap-1.5",
-              "w-full overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+              "w-full min-w-0 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
             )}
           >
             {/* Visible tabs */}
@@ -233,7 +233,7 @@ export function TabsNavigation({
         open={isPreviewOpen}
         onOpenChange={handlePreviewOpenChange}
         closeOnOverlayClick={false}
-        classname="sm:max-w-none w-[90%] p-6"
+        classname="sm:max-w-6xl w-[95vw] max-w-[95vw] max-h-[95vh] p-3 sm:p-4 md:p-6 overflow-hidden flex flex-col"
       >
         <PreviewLayoutForm
           key={`preview-${slug}`}

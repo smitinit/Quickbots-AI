@@ -377,7 +377,7 @@ export default function PreviewLayoutForm({
   }, [lastPollTime]);
 
   return (
-    <Card className="border-none shadow-none p-0">
+    <Card className="border-none shadow-none p-0 w-full h-full flex flex-col overflow-hidden">
       <VisuallyHidden>
         <CardHeader className="text-center pb-6">
           <CardTitle className="text-2xl font-semibold">
@@ -389,14 +389,21 @@ export default function PreviewLayoutForm({
         </CardHeader>
       </VisuallyHidden>
 
-      <CardContent className="flex flex-row h-[90vh] p-0 gap-0">
-        <div className="basis-1/2 flex flex-col relative">
+      <CardContent className="flex flex-col p-0 gap-0 flex-1 min-h-0 overflow-hidden">
+        <div className="w-full flex flex-col relative flex-1 min-h-0 overflow-hidden">
           {isLoadingData ? (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex items-center justify-center h-full min-h-[400px]">
               <Spinner className="size-6 text-muted-foreground" />
             </div>
           ) : (
-            <div className="overflow-y-auto px-4 py-4 relative">
+            <div className="overflow-y-auto px-3 sm:px-4 py-3 sm:py-4 relative flex-1 min-h-0 w-full">
+              {/* Preview Coming Soon Message */}
+              <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                <p className="text-sm text-muted-foreground text-center">
+                  <span className="font-semibold text-primary">Live preview of your bot will be available soon.</span>
+                </p>
+              </div>
+              
               <Form {...form}>
                 <form onSubmit={onSubmit} className="space-y-6">
                   {/* Section: Theme */}
@@ -793,50 +800,6 @@ export default function PreviewLayoutForm({
               </Form>
             </div>
           )}
-        </div>
-        <div className="basis-1/2 border-l border-border bg-card flex flex-col items-center justify-center p-8 relative">
-          {/* Polling Status Indicator */}
-          {!isLoadingData && bot.bot_id && (
-            <div className="absolute top-4 right-4 z-10 bg-background/90 backdrop-blur-sm border border-border rounded-lg px-3 py-2 text-xs space-y-1 shadow-sm">
-              <div className="flex items-center gap-2">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    lastPollTime ? "bg-green-500 animate-pulse" : "bg-gray-400"
-                  }`}
-                />
-                <span className="text-muted-foreground">Poll #{pollCount}</span>
-              </div>
-              {lastPollTime ? (
-                <>
-                  <div className="text-muted-foreground">
-                    Last: {new Date(lastPollTime).toLocaleTimeString()}
-                  </div>
-                  <div className="text-muted-foreground font-medium">
-                    Next in: {nextPollIn}s
-                  </div>
-                  {lastUpdateHadChanges && (
-                    <div className="text-green-600 font-medium">
-                      ✓ Changes detected
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="text-muted-foreground">
-                  Waiting for first poll...
-                </div>
-              )}
-            </div>
-          )}
-          <div className="relative w-full h-full">
-            {!isLoadingData && bot.bot_id ? (
-              // <QuickBot botId={bot.bot_id} />
-              <div>Hello</div>
-            ) : (
-              <div className="flex items-center justify-center w-full h-full">
-                <Spinner className="size-6 text-muted-foreground" />
-              </div>
-            )}
-          </div>
         </div>
       </CardContent>
 

@@ -139,11 +139,11 @@ export default function BotLayoutClient({
 
   return (
     <>
-      <div className="bg-background max-w-[90rem] mx-auto overflow-x-hidden">
+      <div className="bg-background max-w-[90rem] mx-auto overflow-x-hidden w-full min-w-0">
         <BotProvider initials={data}>
           <ContextUpdater botId={botId} />
 
-          <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 px-2 sm:px-4 lg:px-6">
+          <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 px-2 sm:px-3 md:px-4 lg:px-6 w-full min-w-0">
             {/* Sidebar */}
             <div className="hidden lg:flex lg:flex-col lg:w-[22rem] xl:w-sm lg:shrink-0">
               <BotManagementDashboard bot={data.bot} />
@@ -157,8 +157,8 @@ export default function BotLayoutClient({
                 onOpenAnalytics={() => setIsAnalyticsOpen(true)}
               />
 
-              <main className="flex-1 p-2 sm:p-3 md:p-4">
-                <div className="max-w-7xl mx-auto w-full">{children}</div>
+              <main className="flex-1 p-2 sm:p-3 md:p-4 w-full min-w-0">
+                <div className="max-w-7xl mx-auto w-full min-w-0">{children}</div>
               </main>
             </div>
           </div>

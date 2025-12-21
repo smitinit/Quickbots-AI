@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Copy,
   Check,
+  Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +23,13 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const CDN_URL =
   "https://quickbot-ai.smit090305.workers.dev/v1/quickbot.iife.js";
@@ -42,19 +50,19 @@ interface CodeBlockProps {
 }
 
 const CodeBlock = ({ code, id, copiedCode, onCopy }: CodeBlockProps) => (
-  <div className="relative group">
-    <pre className="bg-muted p-3 sm:p-4 rounded-lg overflow-x-auto text-xs sm:text-sm">
-      <code className="whitespace-pre">{code}</code>
+  <div className="relative group w-full min-w-0 max-w-full">
+    <pre className="bg-muted p-3 sm:p-4 rounded-lg overflow-x-auto text-xs sm:text-sm w-full min-w-0 max-w-full">
+      <code className="whitespace-pre block min-w-0">{code}</code>
     </pre>
     <button
       onClick={() => onCopy(code, id)}
-      className="absolute top-2 right-2 p-2 bg-background border border-border rounded hover:bg-muted transition"
+      className="absolute top-2 right-2 p-1.5 sm:p-2 bg-background border border-border rounded hover:bg-muted transition z-10 shrink-0"
       title="Copy code"
     >
       {copiedCode === id ? (
-        <Check className="w-4 h-4 text-green-600" />
+        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600" />
       ) : (
-        <Copy className="w-4 h-4" />
+        <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
       )}
     </button>
   </div>
@@ -107,8 +115,60 @@ export default function DocsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="flex">
+    <div className="min-h-screen bg-background w-full overflow-x-hidden max-w-full">
+      <div className="flex w-full max-w-full min-w-0">
+        {/* Mobile Navigation Sheet */}
+        <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-b border-border">
+          <div className="flex items-center justify-between px-4 py-3">
+            <h2 className="text-lg font-semibold">Documentation</h2>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-64 p-0">
+                <SheetHeader className="p-6 border-b border-border">
+                  <SheetTitle className="flex items-center justify-between">
+                    <span>Navigation</span>
+                    <Badge variant="outline" className="text-xs">
+                      v1.0.0
+                    </Badge>
+                  </SheetTitle>
+                </SheetHeader>
+                <nav className="p-4 space-y-1">
+                  {navSections.map((section) => {
+                    const Icon = section.icon;
+                    return (
+                      <button
+                        key={section.id}
+                        onClick={() => {
+                          setActiveSection(section.id);
+                          document
+                            .getElementById(section.id)
+                            ?.scrollIntoView({ behavior: "smooth" });
+                          // Close sheet on mobile after navigation
+                          document
+                            .querySelector('[data-slot="sheet-close"]')
+                            ?.dispatchEvent(new MouseEvent("click"));
+                        }}
+                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition ${
+                          activeSection === section.id
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        <span>{section.label}</span>
+                      </button>
+                    );
+                  })}
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+
         {/* Desktop Sidebar Navigation - Hidden on mobile */}
         <aside className="hidden lg:block w-64 border-r border-border bg-card/50 sticky top-0 h-screen overflow-y-auto">
           <div className="p-6 space-y-6">
@@ -145,11 +205,11 @@ export default function DocsPage() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-12">
+        <main className="flex-1 w-full min-w-0 max-w-4xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-20 lg:pt-8 pb-8 sm:py-12 lg:py-12 max-w-full">
           {/* Getting Started */}
           <section
             id="getting-started"
-            className="space-y-4 sm:space-y-6 mb-12 sm:mb-16"
+            className="space-y-4 sm:space-y-6 mb-12 sm:mb-16 w-full min-w-0"
           >
             <div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-3 sm:mb-4">
@@ -162,7 +222,7 @@ export default function DocsPage() {
               </p>
             </div>
 
-            <Card>
+            <Card className="w-full overflow-hidden">
               <CardHeader>
                 <CardTitle>What is QuickBots?</CardTitle>
                 <CardDescription>
@@ -204,7 +264,7 @@ export default function DocsPage() {
           {/* Installation */}
           <section
             id="installation"
-            className="space-y-4 sm:space-y-6 mb-12 sm:mb-16"
+            className="space-y-4 sm:space-y-6 mb-12 sm:mb-16 w-full min-w-0"
           >
             <div>
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
@@ -216,7 +276,7 @@ export default function DocsPage() {
               </p>
             </div>
 
-            <Card>
+            <Card className="w-full overflow-hidden">
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="flex flex-wrap items-center gap-2 text-lg sm:text-xl">
                   CDN Link
@@ -229,8 +289,8 @@ export default function DocsPage() {
                   HTML.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
+              <CardContent className="space-y-4 w-full min-w-0 max-w-full">
+                <div className="w-full min-w-0 max-w-full">
                   <p className="text-sm font-medium mb-2">Production CDN:</p>
                   <CodeBlock
                     code={CDN_URL}
@@ -239,14 +299,12 @@ export default function DocsPage() {
                     onCopy={copyToClipboard}
                   />
                 </div>
-                <div>
+                <div className="w-full min-w-0 max-w-full">
                   <p className="text-sm font-medium mb-2">Basic Script Tag:</p>
                   <CodeBlock
                     code={`<script
   src="${CDN_URL}"
   data-bot-id="YOUR_BOT_ID"
-                    copiedCode={copiedCode}
-                    onCopy={copyToClipboard}
   defer
 ></script>`}
                     id="basic-script"
@@ -269,7 +327,7 @@ export default function DocsPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="w-full overflow-hidden">
               <CardHeader>
                 <CardTitle>Get Your Bot ID</CardTitle>
                 <CardDescription>
@@ -338,7 +396,7 @@ export default function DocsPage() {
           {/* Framework Guides */}
           <section
             id="frameworks"
-            className="space-y-4 sm:space-y-6 mb-12 sm:mb-16"
+            className="space-y-4 sm:space-y-6 mb-12 sm:mb-16 w-full min-w-0"
           >
             <div>
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
@@ -350,26 +408,51 @@ export default function DocsPage() {
               </p>
             </div>
 
-            <Tabs defaultValue="html" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 overflow-x-auto">
-                <TabsTrigger value="html">HTML</TabsTrigger>
-                <TabsTrigger value="react">React</TabsTrigger>
-                <TabsTrigger value="nextjs">Next.js</TabsTrigger>
-                <TabsTrigger value="vue">Vue</TabsTrigger>
-                <TabsTrigger value="angular">Angular</TabsTrigger>
+            <Tabs defaultValue="html" className="w-full min-w-0">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] min-w-0">
+                <TabsTrigger
+                  value="html"
+                  className="text-xs sm:text-sm whitespace-nowrap"
+                >
+                  HTML
+                </TabsTrigger>
+                <TabsTrigger
+                  value="react"
+                  className="text-xs sm:text-sm whitespace-nowrap"
+                >
+                  React
+                </TabsTrigger>
+                <TabsTrigger
+                  value="nextjs"
+                  className="text-xs sm:text-sm whitespace-nowrap"
+                >
+                  Next.js
+                </TabsTrigger>
+                <TabsTrigger
+                  value="vue"
+                  className="text-xs sm:text-sm whitespace-nowrap"
+                >
+                  Vue
+                </TabsTrigger>
+                <TabsTrigger
+                  value="angular"
+                  className="text-xs sm:text-sm whitespace-nowrap"
+                >
+                  Angular
+                </TabsTrigger>
               </TabsList>
 
               {/* HTML */}
               <TabsContent value="html" className="space-y-4">
-                <Card>
+                <Card className="w-full overflow-hidden">
                   <CardHeader>
                     <CardTitle>Vanilla HTML</CardTitle>
                     <CardDescription>
                       The simplest integration - just add a script tag!
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
+                  <CardContent className="space-y-4 w-full min-w-0">
+                    <div className="w-full min-w-0 max-w-full">
                       <p className="text-sm font-medium mb-2">
                         Complete HTML Example:
                       </p>
@@ -416,15 +499,15 @@ export default function DocsPage() {
 
               {/* React */}
               <TabsContent value="react" className="space-y-4">
-                <Card>
+                <Card className="w-full overflow-hidden">
                   <CardHeader>
                     <CardTitle>React</CardTitle>
                     <CardDescription>
                       Integrate QuickBots into your React application.
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
+                  <CardContent className="space-y-4 w-full min-w-0">
+                    <div className="w-full min-w-0 max-w-full">
                       <p className="text-sm font-medium mb-2">
                         Using useEffect Hook:
                       </p>
@@ -459,7 +542,7 @@ export default App;`}
                         onCopy={copyToClipboard}
                       />
                     </div>
-                    <div>
+                    <div className="w-full min-w-0 max-w-full">
                       <p className="text-sm font-medium mb-2">
                         Using Custom Element (Alternative):
                       </p>
@@ -504,14 +587,14 @@ function App() {
 
               {/* Next.js */}
               <TabsContent value="nextjs" className="space-y-4">
-                <Card>
+                <Card className="w-full overflow-hidden">
                   <CardHeader>
                     <CardTitle>Next.js</CardTitle>
                     <CardDescription>
                       Add QuickBots to your Next.js application.
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4 w-full min-w-0">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <p className="text-sm font-medium">
@@ -519,8 +602,9 @@ function App() {
                         </p>
                         <Badge variant="default">Recommended</Badge>
                       </div>
-                      <CodeBlock
-                        code={`import Script from 'next/script';
+                      <div className="w-full min-w-0 max-w-full">
+                        <CodeBlock
+                          code={`import Script from 'next/script';
 
 export default function Layout({ children }) {
   return (
@@ -534,12 +618,13 @@ export default function Layout({ children }) {
     </>
   );
 }`}
-                        id="nextjs-script"
-                        copiedCode={copiedCode}
-                        onCopy={copyToClipboard}
-                      />
+                          id="nextjs-script"
+                          copiedCode={copiedCode}
+                          onCopy={copyToClipboard}
+                        />
+                      </div>
                     </div>
-                    <div>
+                    <div className="w-full min-w-0 max-w-full">
                       <p className="text-sm font-medium mb-2">
                         Using Custom Component:
                       </p>
@@ -593,15 +678,15 @@ export function QuickBotWidget({ botId }: { botId: string }) {
 
               {/* Vue */}
               <TabsContent value="vue" className="space-y-4">
-                <Card>
+                <Card className="w-full overflow-hidden">
                   <CardHeader>
                     <CardTitle>Vue.js</CardTitle>
                     <CardDescription>
                       Integrate QuickBots into your Vue application.
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
+                  <CardContent className="space-y-4 w-full min-w-0">
+                    <div className="w-full min-w-0 max-w-full">
                       <p className="text-sm font-medium mb-2">
                         Using Composition API:
                       </p>
@@ -635,7 +720,7 @@ onUnmounted(() => {
                         onCopy={copyToClipboard}
                       />
                     </div>
-                    <div>
+                    <div className="w-full min-w-0 max-w-full">
                       <p className="text-sm font-medium mb-2">
                         Using Options API:
                       </p>
@@ -674,15 +759,15 @@ export default {
 
               {/* Angular */}
               <TabsContent value="angular" className="space-y-4">
-                <Card>
+                <Card className="w-full overflow-hidden">
                   <CardHeader>
                     <CardTitle>Angular</CardTitle>
                     <CardDescription>
                       Add QuickBots to your Angular application.
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
+                  <CardContent className="space-y-4 w-full min-w-0">
+                    <div className="w-full min-w-0 max-w-full">
                       <p className="text-sm font-medium mb-2">
                         Using Component:
                       </p>
@@ -718,7 +803,7 @@ export class AppComponent implements OnInit, OnDestroy {
                         onCopy={copyToClipboard}
                       />
                     </div>
-                    <div>
+                    <div className="w-full min-w-0 max-w-full">
                       <p className="text-sm font-medium mb-2">
                         Using index.html (Alternative):
                       </p>
@@ -753,7 +838,7 @@ export class AppComponent implements OnInit, OnDestroy {
           {/* API Reference */}
           <section
             id="api-reference"
-            className="space-y-4 sm:space-y-6 mb-12 sm:mb-16"
+            className="space-y-4 sm:space-y-6 mb-12 sm:mb-16 w-full min-w-0"
           >
             <div>
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
@@ -765,7 +850,7 @@ export class AppComponent implements OnInit, OnDestroy {
               </p>
             </div>
 
-            <Card>
+            <Card className="w-full overflow-hidden">
               <CardHeader>
                 <CardTitle>QuickBot.init()</CardTitle>
                 <CardDescription>
@@ -799,7 +884,7 @@ export class AppComponent implements OnInit, OnDestroy {
                     </span>
                   </div>
                 </div>
-                <div>
+                <div className="w-full min-w-0 max-w-full">
                   <p className="text-sm font-medium mb-2">Example:</p>
                   <CodeBlock
                     code={`// Initialize widget
@@ -815,7 +900,7 @@ window.QuickBot.init({
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="w-full overflow-hidden">
               <CardHeader>
                 <CardTitle>QuickBot.destroy()</CardTitle>
                 <CardDescription>
@@ -823,7 +908,7 @@ window.QuickBot.init({
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
+                <div className="w-full min-w-0 max-w-full">
                   <p className="text-sm font-medium mb-2">Syntax:</p>
                   <CodeBlock
                     code={`window.QuickBot.destroy(botId: string);`}
@@ -832,7 +917,7 @@ window.QuickBot.init({
                     onCopy={copyToClipboard}
                   />
                 </div>
-                <div>
+                <div className="w-full min-w-0 max-w-full">
                   <p className="text-sm font-medium mb-2">Example:</p>
                   <CodeBlock
                     code={`// Remove widget
@@ -845,7 +930,7 @@ window.QuickBot.destroy('a1b2c3d4-e5f6-7890-abcd-ef1234567890');`}
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="w-full overflow-hidden">
               <CardHeader>
                 <CardTitle>Custom Element</CardTitle>
                 <CardDescription>
@@ -853,7 +938,7 @@ window.QuickBot.destroy('a1b2c3d4-e5f6-7890-abcd-ef1234567890');`}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
+                <div className="w-full min-w-0 max-w-full">
                   <p className="text-sm font-medium mb-2">Usage:</p>
                   <CodeBlock
                     code={`<!-- After loading the script, you can use the custom element -->
@@ -880,7 +965,7 @@ window.QuickBot.destroy('a1b2c3d4-e5f6-7890-abcd-ef1234567890');`}
           {/* Configuration */}
           <section
             id="configuration"
-            className="space-y-4 sm:space-y-6 mb-12 sm:mb-16"
+            className="space-y-4 sm:space-y-6 mb-12 sm:mb-16 w-full min-w-0"
           >
             <div>
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
@@ -892,7 +977,7 @@ window.QuickBot.destroy('a1b2c3d4-e5f6-7890-abcd-ef1234567890');`}
               </p>
             </div>
 
-            <Card>
+            <Card className="w-full overflow-hidden">
               <CardHeader>
                 <CardTitle>Available Settings</CardTitle>
                 <CardDescription>
@@ -945,7 +1030,7 @@ window.QuickBot.destroy('a1b2c3d4-e5f6-7890-abcd-ef1234567890');`}
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="w-full overflow-hidden">
               <CardHeader>
                 <CardTitle>Dark Mode</CardTitle>
                 <CardDescription>
@@ -977,7 +1062,7 @@ window.QuickBot.destroy('a1b2c3d4-e5f6-7890-abcd-ef1234567890');`}
           </section>
 
           {/* CTA */}
-          <Card className="bg-primary/5 border-primary/30">
+          <Card className="bg-primary/5 border-primary/30 w-full overflow-hidden">
             <CardContent className="pt-6 p-4 sm:p-6">
               <div className="text-center space-y-4">
                 <h3 className="text-xl sm:text-2xl font-bold text-foreground">

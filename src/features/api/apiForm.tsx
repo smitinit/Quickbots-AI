@@ -41,15 +41,15 @@ const CodeBlock = ({
   copiedSection,
   onCopy,
 }: CodeBlockProps) => (
-  <div className="space-y-2">
+  <div className="space-y-2 w-full min-w-0 max-w-full">
     {title && (
-      <div className="flex items-center justify-between">
-        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+      <div className="flex items-center justify-between gap-2">
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide truncate">
           {title}
         </label>
         <button
           onClick={() => onCopy(code, id)}
-          className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors"
+          className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors shrink-0"
         >
           {copiedSection === id ? (
             <>
@@ -65,8 +65,8 @@ const CodeBlock = ({
         </button>
       </div>
     )}
-    <pre className="bg-muted/50 border border-border/50 rounded-lg p-4 overflow-x-auto">
-      <code className="text-xs font-mono text-foreground whitespace-pre">
+    <pre className="bg-muted/50 border border-border/50 rounded-lg p-3 sm:p-4 overflow-x-auto w-full min-w-0 max-w-full">
+      <code className="text-xs font-mono text-foreground whitespace-pre block min-w-0">
         {code}
       </code>
     </pre>
@@ -235,17 +235,17 @@ export class AppComponent implements OnInit, OnDestroy {
 }`;
 
   return (
-    <div className="w-full mx-auto max-w-5xl px-6 py-8">
-      <div className="space-y-1 mb-8">
-        <h1 className="text-3xl font-semibold text-primary">Embed QuickBot</h1>
-        <p className="text-sm text-muted-foreground">
+    <div className="w-full mx-auto max-w-5xl px-3 sm:px-4 md:px-6 py-6 sm:py-8 min-w-0 overflow-x-hidden">
+      <div className="space-y-1 mb-6 sm:mb-8 w-full min-w-0">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-primary">Embed QuickBot</h1>
+        <p className="text-xs sm:text-sm text-muted-foreground">
           Integrate your chatbot into any website or application. Copy the code
           snippets below and paste them into your project.
         </p>
       </div>
 
       {/* Bot ID Card */}
-      <Card className="mb-6 border-primary/30 bg-primary/5">
+      <Card className="mb-6 border-primary/30 bg-primary/5 w-full overflow-hidden">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="w-5 h-5" />
@@ -256,8 +256,8 @@ export class AppComponent implements OnInit, OnDestroy {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-3">
-            <code className="flex-1 bg-background border border-border rounded-lg px-4 py-3 font-mono text-sm text-foreground">
+          <div className="flex items-center gap-2 sm:gap-3 w-full min-w-0">
+            <code className="flex-1 bg-background border border-border rounded-lg px-3 sm:px-4 py-2 sm:py-3 font-mono text-xs sm:text-sm text-foreground truncate min-w-0">
               {bot.bot_id}
             </code>
             <Button
@@ -286,7 +286,7 @@ export class AppComponent implements OnInit, OnDestroy {
       </Card>
 
       {/* Quick Start */}
-      <Card className="mb-6">
+      <Card className="mb-6 w-full overflow-hidden">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Globe className="w-5 h-5" />
@@ -312,7 +312,7 @@ export class AppComponent implements OnInit, OnDestroy {
       </Card>
 
       {/* Framework Integration */}
-      <Card className="mb-6">
+      <Card className="mb-6 w-full overflow-hidden">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Code className="w-5 h-5" />
@@ -403,8 +403,8 @@ export class AppComponent implements OnInit, OnDestroy {
       </Card>
 
       {/* Documentation Link */}
-      <Card className="border-primary/30 bg-primary/5">
-        <CardContent className="pt-6">
+      <Card className="border-primary/30 bg-primary/5 w-full overflow-hidden">
+        <CardContent className="pt-6 w-full min-w-0">
           <div className="text-center space-y-4">
             <h3 className="text-lg font-semibold text-foreground">
               Need More Help?
