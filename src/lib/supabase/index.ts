@@ -3,6 +3,5 @@
  * Admin client and error handling
  */
 
-export { supabaseAdmin } from "./admin";
+export { getSupabaseAdmin } from "./admin";
 export { supabaseErrorToMessage } from "./error-mapper";
-

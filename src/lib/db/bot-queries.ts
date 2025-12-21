@@ -1,7 +1,7 @@
 "server only";
 
 import crypto from "crypto";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import type { ApiKeyRow, BotConfigFull } from "@/types";
 import {
   BotConfigsSchema,
@@ -23,6 +23,7 @@ import {
 export async function getBotProfile(
   botId: string
 ): Promise<BotConfigFull | null> {
+  const supabaseAdmin = getSupabaseAdmin();
   // Fetch all three tables in parallel
   const [configRes, settingsRes, runtimeRes] = await Promise.all([
     supabaseAdmin.from("bot_configs").select("*").eq("bot_id", botId).single(),
@@ -167,6 +168,7 @@ export function signECDSAPayload(payload: object, rawHex: string): string {
 export async function lookupApiKey(
   rawToken: string
 ): Promise<ApiKeyRow | null> {
+  const supabaseAdmin = getSupabaseAdmin();
   // Hash the raw token using SHA-256
   const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
 

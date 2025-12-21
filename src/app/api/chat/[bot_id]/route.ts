@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getBotProfile, lookupApiKey } from "@/lib/db/bot-queries";
 import { buildSystemPrompt } from "@/lib/llm/system-prompt-builder";
 import { logChat } from "@/lib/db/chat-logs";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { isObviousGibberish } from "@/lib/validation/gibberish-detector";
 
 export const runtime = "nodejs";
@@ -57,6 +57,7 @@ export async function POST(
 ) {
   const startTs = Date.now();
   let finalText = "";
+  const supabaseAdmin = getSupabaseAdmin();
 
   try {
     /* ---------------------------------------------
@@ -169,7 +170,7 @@ export async function POST(
     const abortController = new AbortController();
     req.signal.addEventListener("abort", () => abortController.abort());
 
-    const apiModelUrl = process.env.API_MODEL_URL 
+    const apiModelUrl = process.env.API_MODEL_URL;
     const ollamaRes = await fetch(`${apiModelUrl}/api/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

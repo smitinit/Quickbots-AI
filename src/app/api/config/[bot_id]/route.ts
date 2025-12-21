@@ -135,7 +135,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getBotProfile, signECDSAPayload } from "@/lib/db/bot-queries";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import type { BotUiSettingsRow } from "@/types";
 
 export const runtime = "nodejs";
@@ -197,6 +197,7 @@ export async function GET(
     }
 
     // Fetch bot data
+    const supabaseAdmin = getSupabaseAdmin();
     const [bot, uiSettingsRes] = await Promise.all([
       getBotProfile(validatedBotId),
       supabaseAdmin

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import type { FieldType } from "@/types/ai.types";
 
 export const runtime = "nodejs";
@@ -323,6 +323,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: validationError }, { status: 400 });
     }
 
+    const supabaseAdmin = getSupabaseAdmin();
     const { data: settings } = await supabaseAdmin
       .from("bot_settings")
       .select("*")
