@@ -1,20 +1,41 @@
-## This project is currently under development and will be live soon...!
+# QuickBots AI
+
+**QuickBots AI** is a multi-tenant SaaS platform for creating, configuring, and managing AI-powered chatbots. This project is currently in **beta**.
+
+## 🚀 Features
+
+- **AI-Powered Chatbots**: Create intelligent chatbots with customizable personalities
+- **Easy Integration**: Embed chatbots on any website with a single script tag
+- **Real-time Configuration**: Update chatbot settings and see changes instantly
+- **Customizable UI**: Configure themes, colors, and behavior to match your brand
+- **Analytics**: Track chatbot performance and user interactions
+- **Multi-tenant Architecture**: Secure, isolated bot configurations per user
+
+## 📦 Quick Start
 
 ### Embed QuickBot on Your Website
 
 To embed a QuickBot chatbot on your website, add this script tag:
 
 ```html
-<script 
+<script
   src="https://quickbot-ai.smit090305.workers.dev/v1/quickbot.iife.js"
   data-bot-id="YOUR_BOT_ID"
-  defer>
-</script>
+  defer
+></script>
 ```
 
 The chatbot will automatically appear as a floating button in the bottom-right corner. Click it to open the chat interface.
 
-### Here are the glimpses of this project
+## 🔗 Documentation
+
+For detailed documentation including architecture, API routes, data flow, and complete project flow, see [PROJECT_FLOW_DOCUMENTATION.md](./PROJECT_FLOW_DOCUMENTATION.md).
+
+## 🌐 Live Demo
+
+Visit the live application at [https://quickbots-ai.vercel.app](https://quickbots-ai.vercel.app)
+
+## 📝 Project Glimpses
 
 <image here>
 
@@ -24,7 +45,7 @@ The chatbot will automatically appear as a floating button in the bottom-right c
 
 <image here>
 
-<image here>
+<image here></image>
 
 <image here>
 
