@@ -37,6 +37,8 @@ Visit the live application at [https://quickbots-ai.vercel.app](https://quickbot
 
 ## 📝 Project Glimpses
 
+### coming soon!
+
 <image here>
 
 <image here>
