@@ -78,7 +78,6 @@ export async function GET(
       uiSettingsRes.data ||
       ({
         bot_id: validatedBotId,
-        theme: "modern",
         chatbot_name: "QuickBot Assistant",
         welcome_message: greeting,
         quick_questions: [],
@@ -94,7 +93,6 @@ export async function GET(
 
     // Only allow safe fields
     const allowed = [
-      "theme",
       "chatbot_name",
       "welcome_message",
       "quick_questions",
@@ -115,8 +113,13 @@ export async function GET(
 
     const signature = signECDSAPayload(payloadToSign, PRIVATE_KEY_RAW);
 
+    // Filter out theme from response (legacy field, no longer used)
+    const uiSettingsForResponse = Object.fromEntries(
+      Object.entries(rawUiSettings).filter(([k]) => k !== "theme")
+    );
+
     const responseBody = {
-      ui_settings: rawUiSettings,
+      ui_settings: uiSettingsForResponse,
       signature,
     };
 

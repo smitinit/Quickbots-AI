@@ -11,7 +11,7 @@ import {
   BotSettingsSchema,
   BotRuntimeSchema,
 } from "@/schema/zod";
-import type { Theme, Position, ApiKeyPermission } from "@/schema/constants";
+import type { Position, ApiKeyPermission } from "@/schema/constants";
 
 /* ---------------------------------------------
    Bot Types
@@ -57,7 +57,6 @@ export type PreviewType = z.infer<typeof previewSchema> & {
 export interface BotUiSettingsRow {
   id?: number;
   bot_id: string;
-  theme: "modern" | "classic" | "minimal" | "bubble" | "retro";
   chatbot_name: string;
   welcome_message: string;
   quick_questions: string[];
@@ -117,7 +116,6 @@ export interface FullBotType {
 --------------------------------------------- */
 export function toCamelCase(dbRow: BotUiSettingsRow): PreviewType {
   return {
-    theme: dbRow.theme as Theme,
     chatbotName: dbRow.chatbot_name,
     welcomeMessage: dbRow.welcome_message,
     quickQuestions: dbRow.quick_questions || [],
@@ -139,7 +137,6 @@ export function toSnakeCase(formData: PreviewType): Partial<BotUiSettingsRow> {
   );
 
   return {
-    theme: formData.theme,
     chatbot_name: formData.chatbotName,
     welcome_message: formData.welcomeMessage,
     quick_questions: filteredQuickQuestions,

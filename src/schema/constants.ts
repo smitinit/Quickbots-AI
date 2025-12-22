@@ -33,8 +33,6 @@ export const EXPERTISE = [
   "custom",
 ] as const;
 
-export const THEME = ["modern", "classic", "minimal", "bubble", "retro"] as const;
-
 export const AVATAR_SHAPE = ["circle", "rounded", "square"] as const;
 
 export const POSITION = ["bottom-right", "bottom-left"] as const;
@@ -60,7 +58,6 @@ export type ToneStyle = (typeof TONE_STYLE)[number];
 export type WritingStyle = (typeof WRITING_STYLE)[number];
 export type ResponseStyle = (typeof RESPONSE_STYLE)[number];
 export type Expertise = (typeof EXPERTISE)[number];
-export type Theme = (typeof THEME)[number];
 export type AvatarShape = (typeof AVATAR_SHAPE)[number];
 export type Position = (typeof POSITION)[number];
 export type TypingIndicatorStyle = (typeof TYPING_INDICATOR_STYLE)[number];

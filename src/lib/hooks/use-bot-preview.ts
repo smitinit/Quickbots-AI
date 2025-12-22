@@ -147,7 +147,6 @@ export function usePreviewActions() {
 
       // Whitelist allowed fields only
       const allowed = [
-        "theme",
         "chatbot_name",
         "welcome_message",
         "quick_questions",

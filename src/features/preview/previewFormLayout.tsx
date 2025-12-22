@@ -105,7 +105,6 @@ export default function PreviewLayoutForm({
 
   const form = useForm<PreviewType>({
     defaultValues: {
-      theme: "modern",
       chatbotName: "QuickBot Assistant",
       welcomeMessage: "Hi! How can I assist you today?",
       quickQuestions: ["", "", "", "", ""],
@@ -406,49 +405,6 @@ export default function PreviewLayoutForm({
               
               <Form {...form}>
                 <form onSubmit={onSubmit} className="space-y-6">
-                  {/* Section: Theme */}
-                  <div className="space-y-4">
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-semibold text-foreground">
-                        Theme
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        Choose a theme pack with predefined colors
-                      </p>
-                    </div>
-
-                    <FormField
-                      control={form.control}
-                      name="theme"
-                      render={({ field }) => (
-                        <FormItem className="space-y-2">
-                          <FormLabel className="text-xs font-medium text-foreground">
-                            Theme Pack
-                          </FormLabel>
-                          <FormControl>
-                            <Select
-                              onValueChange={field.onChange}
-                              value={field.value}
-                              disabled={true}
-                            >
-                              <SelectTrigger className="h-9 text-sm bg-background border-border focus:border-primary focus:ring-1 focus:ring-primary">
-                                <SelectValue placeholder="Select theme" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="modern">Modern</SelectItem>
-                                <SelectItem value="classic">Classic</SelectItem>
-                                <SelectItem value="minimal">Minimal</SelectItem>
-                                <SelectItem value="bubble">Bubble</SelectItem>
-                                <SelectItem value="retro">Retro</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                          <FormMessage className="text-xs" />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
                   {/* Section: Bot Identity */}
                   <div className="space-y-4">
                     <div className="space-y-1">

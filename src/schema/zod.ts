@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { THEME, POSITION, API_KEY_PERMISSIONS } from "./constants";
+import { POSITION, API_KEY_PERMISSIONS } from "./constants";
 
 /* ---------------------------------------------
    Bot Schema
@@ -93,7 +93,6 @@ export const BotRuntimeSchema = z.object({
    Matches the new simplified bot_ui_settings table
 --------------------------------------------- */
 export const previewSchema = z.object({
-  theme: z.enum(THEME),
   chatbotName: z
     .string()
     .min(1, "Chatbot name is required")
