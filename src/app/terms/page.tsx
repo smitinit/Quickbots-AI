@@ -35,7 +35,7 @@ const sections = [
   {
     title: "4. Liability & Termination",
     items: [
-      "Quickbots is provided "as is". To the fullest extent permitted by law, we disclaim warranties and limit liability to the fees you paid in the preceding 12 months.",
+      "Quickbots is provided 'as is'. To the fullest extent permitted by law, we disclaim warranties and limit liability to the fees you paid in the preceding 12 months.",
       "Either party may terminate access at any time. Upon termination you should export your bot data; we will retain it only as required for backups and legal compliance.",
       "These terms are governed by the laws of the jurisdiction where Quickbots is registered. Disputes will be handled in that jurisdiction's courts.",
     ],
@@ -82,7 +82,9 @@ export default function TermsPage() {
         </div>
 
         <footer className="rounded-2xl border border-border/60 bg-muted/20 p-6 text-sm md:text-base space-y-2">
-          <p className="font-semibold text-foreground mb-2">Need a custom addendum?</p>
+          <p className="font-semibold text-foreground mb-2">
+            Need a custom addendum?
+          </p>
           <p className="text-muted-foreground">
             Contact us if your legal team requires a data processing agreement,
             enterprise SLA, or other custom clauses. We are happy to review
@@ -103,4 +105,3 @@ export default function TermsPage() {
     </section>
   );
 }
-

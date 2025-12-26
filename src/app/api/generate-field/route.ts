@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { fieldGenerationRateLimit } from "@/lib/upstash/rate-limit";
 import type { FieldType } from "@/types/ai.types";
 
 export const runtime = "nodejs";
@@ -322,6 +323,30 @@ export async function POST(req: NextRequest) {
 
     const { botId, field, context, currentValue } = parsed.data;
     const typedField = field as FieldType;
+
+    /* Rate limit (per bot) */
+    const rateKey = `bot:${botId}`;
+    const { success, remaining, reset } = await fieldGenerationRateLimit.limit(rateKey);
+
+    if (!success) {
+      console.warn("[RATE LIMIT] Field generation exceeded", {
+        botId,
+        reset,
+      });
+
+      return NextResponse.json(
+        {
+          error: "Too many requests. Please slow down.",
+        },
+        {
+          status: 429,
+          headers: {
+            "X-RateLimit-Remaining": remaining.toString(),
+            "X-RateLimit-Reset": reset.toString(),
+          },
+        }
+      );
+    }
 
     if (DISABLED_AI_FIELDS.includes(typedField)) {
       return NextResponse.json(

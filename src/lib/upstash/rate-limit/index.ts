@@ -1,2 +1,2 @@
-export { chatRateLimit } from "./rate-limit";
+export { chatRateLimit, fieldGenerationRateLimit } from "./rate-limit";
 

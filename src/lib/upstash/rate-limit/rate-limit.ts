@@ -15,3 +15,15 @@ export const chatRateLimit = new Ratelimit({
   analytics: true, // enables dashboard graphs
   prefix: "ratelimit:chat",
 });
+
+/**
+ * Field generation rate limit
+ *  - 10 requests per minute per bot
+ *  - More restrictive since AI generation is more expensive
+ */
+export const fieldGenerationRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(10, "1 m"),
+  analytics: true,
+  prefix: "ratelimit:field-generation",
+});
