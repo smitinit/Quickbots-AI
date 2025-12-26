@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useTransition } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter, usePathname } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/modal";
 import PreviewLayoutForm from "@/features/preview/previewFormLayout";
@@ -57,6 +58,7 @@ export function TabsNavigation({
   const { isPreviewOpen, setIsPreviewOpen } = usePreviewModal();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const isDirtyRef = useRef(false);
+  const [isPending, startTransition] = useTransition();
 
   const current = pathname.split("/").pop();
   const activeTab = routes.includes(current ?? "") ? current : "configure";
@@ -94,6 +96,16 @@ export function TabsNavigation({
 
   return (
     <>
+      {/* Loading overlay when switching tabs */}
+      {isPending && (
+        <div className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      )}
+      
       <div className="max-w-4xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 pt-4 sm:pt-5 md:pt-6 overflow-x-hidden w-full min-w-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <Tabs value={activeTab} className={cn("w-full min-w-0")}>
           <TabsList
@@ -110,17 +122,24 @@ export function TabsNavigation({
                 value={route}
                 onClick={() => {
                   const newPath = `/bots/${slug}/${route}`;
-                  router.push(newPath, { scroll: false });
+                  startTransition(() => {
+                    router.push(newPath, { scroll: false });
+                  });
                 }}
+                disabled={isPending}
                 className={cn(
                   "px-2 sm:px-3 py-1 sm:py-0.5 text-xs sm:text-sm font-medium shrink-0",
                   "transition-colors duration-200",
                   "hover:bg-muted/80 hover:text-foreground",
                   "data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow data-[state=active]:py-2 sm:data-[state=active]:py-2.5",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                  "whitespace-nowrap"
+                  "whitespace-nowrap",
+                  isPending && "opacity-50 cursor-wait"
                 )}
               >
+                {isPending && activeTab !== route ? (
+                  <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin mr-1" />
+                ) : null}
                 {routeLabels[route] || route.replace("-", " ")}
               </TabsTrigger>
             ))}
@@ -133,17 +152,24 @@ export function TabsNavigation({
                   value={route}
                   onClick={() => {
                     const newPath = `/bots/${slug}/${route}`;
-                    router.push(newPath, { scroll: false });
+                    startTransition(() => {
+                      router.push(newPath, { scroll: false });
+                    });
                   }}
+                  disabled={isPending}
                   className={cn(
                     "px-2 sm:px-3 py-1 sm:py-0.5 text-xs sm:text-sm font-medium shrink-0",
                     "transition-colors duration-200",
                     "hover:bg-muted/80 hover:text-foreground",
                     "data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow data-[state=active]:py-2 sm:data-[state=active]:py-2.5",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                    "whitespace-nowrap"
+                    "whitespace-nowrap",
+                    isPending && "opacity-50 cursor-wait"
                   )}
                 >
+                  {isPending && activeTab !== route ? (
+                    <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin mr-1" />
+                  ) : null}
                   {routeLabels[route] || route.replace("-", " ")}
                 </TabsTrigger>
               ))}
@@ -181,12 +207,19 @@ export function TabsNavigation({
                         key={route}
                         onClick={() => {
                           const newPath = `/bots/${slug}/${route}`;
-                          router.push(newPath, { scroll: false });
+                          startTransition(() => {
+                            router.push(newPath, { scroll: false });
+                          });
                         }}
+                        disabled={isPending}
                         className={cn(
-                          activeTab === route && "bg-muted font-semibold"
+                          activeTab === route && "bg-muted font-semibold",
+                          isPending && "opacity-50 cursor-wait"
                         )}
                       >
+                        {isPending && activeTab !== route ? (
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                        ) : null}
                         {label}
                       </DropdownMenuItem>
                     );

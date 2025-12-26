@@ -4,10 +4,13 @@
 
 ## 🚀 Features
 
-- **AI-Powered Chatbots**: Create intelligent chatbots with customizable personalities
+- **AI-Powered Chatbots**: Create intelligent chatbots with customizable personalities using Groq LLM
+- **RAG (Retrieval-Augmented Generation)**: Context-aware responses using Upstash Search
+- **AI Field Generation**: Automatically generate bot configuration fields with Google Gemini
 - **Easy Integration**: Embed chatbots on any website with a single script tag
 - **Real-time Configuration**: Update chatbot settings and see changes instantly
 - **Customizable UI**: Configure themes, colors, and behavior to match your brand
+- **Rate Limiting**: Built-in rate limiting to protect your API endpoints
 - **Analytics**: Track chatbot performance and user interactions
 - **Multi-tenant Architecture**: Secure, isolated bot configurations per user
 

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { useForm, type Resolver } from "react-hook-form";
+import { useEffect, useState, useTransition, useMemo } from "react";
+import { useForm, type Resolver, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { hasActualFormChanges } from "@/lib/utils/form-change-detector";
 
 import {
   Form,
@@ -60,19 +61,31 @@ export default function BotConfigForm() {
     if (configs) form.reset(configs);
   }, [configs, form]);
 
+  // Watch all form values for change detection
+  const currentValues = useWatch({ control: form.control });
+
+  // Check for actual content changes (ignoring whitespace-only changes)
+  const hasActualChanges = useMemo(() => {
+    if (!configs || !currentValues) return false;
+    return hasActualFormChanges(configs, currentValues as BotConfigType);
+  }, [configs, currentValues]);
+
   // form states isDirty -> checks the existing config with current and isSubmitting -> persisting loader
   const { isDirty, isSubmitting } = form.formState;
+
+  // Use actual changes instead of isDirty for save bubble
+  const shouldShowSave = hasActualChanges;
 
   // warn user if there is any changes and he is closing the site
   useEffect(() => {
     const warnUser = (e: BeforeUnloadEvent) => {
-      if (form.formState.isDirty) {
+      if (hasActualChanges) {
         e.preventDefault();
       }
     };
     window.addEventListener("beforeunload", warnUser);
     return () => window.removeEventListener("beforeunload", warnUser);
-  }, [form.formState.isDirty]);
+  }, [hasActualChanges]);
 
   // hook
   const [isPendingUpdate, startTransition] = useTransition();
@@ -156,26 +169,6 @@ export default function BotConfigForm() {
                           placeholder="Describe your bot's personality and character traits..."
                           className="min-h-[100px] bg-background border-border focus:border-primary focus:ring-1 focus:ring-primary resize-none"
                           {...field}
-                          onChange={(e) => {
-                            const newValue = e.target.value;
-                            const trimmed = newValue.trim();
-                            const currentTrimmed = (field.value || "").trim();
-                            
-                            // If trimmed values are the same, set to trimmed immediately to prevent isDirty
-                            if (trimmed === currentTrimmed && newValue !== field.value) {
-                              field.onChange(trimmed);
-                            } else {
-                              field.onChange(newValue);
-                            }
-                          }}
-                          onBlur={(e) => {
-                            // Trim on blur to clean up trailing whitespace
-                            const trimmed = e.target.value.trim();
-                            if (trimmed !== e.target.value) {
-                              field.onChange(trimmed);
-                            }
-                            field.onBlur();
-                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -201,21 +194,6 @@ export default function BotConfigForm() {
                           placeholder="What's your bot's purpose, goal, or philosophy?"
                           className="min-h-[100px] bg-background border-border focus:border-primary focus:ring-1 focus:ring-primary resize-none"
                           {...field}
-                          onChange={(e) => {
-                            const trimmed = e.target.value.trim();
-                            if (trimmed !== (field.value || "").trim()) {
-                              field.onChange(e.target.value);
-                            } else {
-                              field.onChange(trimmed);
-                            }
-                          }}
-                          onBlur={(e) => {
-                            const trimmed = e.target.value.trim();
-                            if (trimmed !== e.target.value) {
-                              field.onChange(trimmed);
-                            }
-                            field.onBlur();
-                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -254,22 +232,8 @@ export default function BotConfigForm() {
                         <Textarea
                           placeholder="Define how your bot greets users (optional)"
                           className="min-h-[80px] bg-background border-border focus:border-primary focus:ring-1 focus:ring-primary resize-none"
+                          {...field}
                           value={field.value || ""}
-                          onChange={(e) => {
-                            const trimmed = e.target.value.trim();
-                            if (trimmed !== (field.value || "").trim()) {
-                              field.onChange(e.target.value);
-                            } else {
-                              field.onChange(trimmed);
-                            }
-                          }}
-                          onBlur={(e) => {
-                            const trimmed = e.target.value.trim();
-                            if (trimmed !== e.target.value) {
-                              field.onChange(trimmed);
-                            }
-                            field.onBlur();
-                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -296,22 +260,8 @@ export default function BotConfigForm() {
                         <Textarea
                           placeholder="Message to display when bot cannot respond (optional)"
                           className="min-h-[80px] bg-background border-border focus:border-primary focus:ring-1 focus:ring-primary resize-none"
+                          {...field}
                           value={field.value || ""}
-                          onChange={(e) => {
-                            const trimmed = e.target.value.trim();
-                            if (trimmed !== (field.value || "").trim()) {
-                              field.onChange(e.target.value);
-                            } else {
-                              field.onChange(trimmed);
-                            }
-                          }}
-                          onBlur={(e) => {
-                            const trimmed = e.target.value.trim();
-                            if (trimmed !== e.target.value) {
-                              field.onChange(trimmed);
-                            }
-                            field.onBlur();
-                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -335,7 +285,7 @@ export default function BotConfigForm() {
         </Form>
       </div>
       <SaveTriggerUI
-        isDirty={isDirty}
+        isDirty={shouldShowSave}
         isSubmitting={isSubmitting}
         isPendingUpdate={isPendingUpdate}
         onSave={() => form.handleSubmit(onSubmit)()}

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { Resolver, useForm } from "react-hook-form";
+import { useEffect, useState, useTransition, useMemo } from "react";
+import { Resolver, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { hasActualFormChanges } from "@/lib/utils/form-change-detector";
 
 import {
   Form,
@@ -71,19 +72,39 @@ export default function BotSettingsForm() {
     }
   }, [settings, form]);
 
+  // Watch all form values for change detection
+  const currentValues = useWatch({ control: form.control });
+
+  // Check for actual content changes (ignoring whitespace-only changes)
+  const hasActualChanges = useMemo(() => {
+    if (!settings || !currentValues) return false;
+    // Normalize settings to include supported_languages default
+    const normalizedSettings = {
+      ...settings,
+      supported_languages: settings.supported_languages || ["en"],
+    };
+    return hasActualFormChanges(
+      normalizedSettings,
+      currentValues as BotSettingsType
+    );
+  }, [settings, currentValues]);
+
   // form states isDirty -> checks the existing settings with current and isSubmitting -> persisting loader
   const { isDirty, isSubmitting } = form.formState;
+
+  // Use actual changes instead of isDirty for save bubble
+  const shouldShowSave = hasActualChanges;
 
   // warn user if there is any changes and he is closing the site
   useEffect(() => {
     const warnUser = (e: BeforeUnloadEvent) => {
-      if (form.formState.isDirty) {
+      if (hasActualChanges) {
         e.preventDefault();
       }
     };
     window.addEventListener("beforeunload", warnUser);
     return () => window.removeEventListener("beforeunload", warnUser);
-  }, [form.formState.isDirty]);
+  }, [hasActualChanges]);
 
   // hook
   const [isPendingUpdate, startUpdateTransition] = useTransition();
@@ -104,7 +125,7 @@ export default function BotSettingsForm() {
         ...values,
         supported_languages: ["en"] as [string, ...string[]],
       };
-      
+
       // db call to update the settings
       const result = await updateBotSettings(bot.bot_id!, updatedValues);
 
@@ -206,28 +227,19 @@ export default function BotSettingsForm() {
                         Business Description
                       </FormLabel>
                       <GenerateButton
-                        onClick={() => handleGenerateClick("business_description")}
+                        onClick={() =>
+                          handleGenerateClick("business_description")
+                        }
                       />
                     </div>
                     <FormControl>
                       <Textarea
                         placeholder="Describe your business and what it does..."
                         className="min-h-[100px] bg-background border-border focus:border-primary focus:ring-1 focus:ring-primary resize-none"
+                        {...field}
                         value={field.value ?? ""}
-                        onChange={(e) => {
-                          const newValue = e.target.value;
-                          const trimmed = newValue.trim();
-                          const currentTrimmed = (field.value || "").trim();
-                          
-                          // If trimmed values are the same, set to trimmed immediately to prevent isDirty
-                          if (trimmed === currentTrimmed && newValue !== field.value) {
-                            field.onChange(trimmed);
-                          } else {
-                            field.onChange(newValue);
-                          }
-                        }}
                         onBlur={(e) => {
-                          // Trim on blur to clean up trailing whitespace
+                          // Only trim on blur to clean up trailing whitespace
                           const trimmed = e.target.value.trim();
                           if (trimmed !== e.target.value) {
                             field.onChange(trimmed);
@@ -285,28 +297,19 @@ export default function BotSettingsForm() {
                         Product Description
                       </FormLabel>
                       <GenerateButton
-                        onClick={() => handleGenerateClick("product_description")}
+                        onClick={() =>
+                          handleGenerateClick("product_description")
+                        }
                       />
                     </div>
                     <FormControl>
                       <Textarea
                         placeholder="Describe your product features and benefits..."
                         className="min-h-[100px] bg-background border-border focus:border-primary focus:ring-1 focus:ring-primary resize-none"
+                        {...field}
                         value={field.value ?? ""}
-                        onChange={(e) => {
-                          const newValue = e.target.value;
-                          const trimmed = newValue.trim();
-                          const currentTrimmed = (field.value || "").trim();
-                          
-                          // If trimmed values are the same, set to trimmed immediately to prevent isDirty
-                          if (trimmed === currentTrimmed && newValue !== field.value) {
-                            field.onChange(trimmed);
-                          } else {
-                            field.onChange(newValue);
-                          }
-                        }}
                         onBlur={(e) => {
-                          // Trim on blur to clean up trailing whitespace
+                          // Only trim on blur to clean up trailing whitespace
                           const trimmed = e.target.value.trim();
                           if (trimmed !== e.target.value) {
                             field.onChange(trimmed);
@@ -396,7 +399,8 @@ export default function BotSettingsForm() {
                       />
                     </FormControl>
                     <FormDescription className="text-xs text-muted-foreground">
-                      Currently only English is supported. Additional languages coming soon.
+                      Currently only English is supported. Additional languages
+                      coming soon.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -419,7 +423,7 @@ export default function BotSettingsForm() {
         </Form>
       </div>
       <SaveTriggerUI
-        isDirty={isDirty}
+        isDirty={shouldShowSave}
         isSubmitting={isSubmitting}
         isPendingUpdate={isPendingUpdate}
         onSave={() => form.handleSubmit(onSubmit)()}
@@ -441,7 +445,9 @@ export default function BotSettingsForm() {
           onOpenChange={setSheetOpen}
           field={activeField}
           botId={bot.bot_id!}
-          currentValue={form.getValues(activeField as keyof BotSettingsType) as string}
+          currentValue={
+            form.getValues(activeField as keyof BotSettingsType) as string
+          }
           onApply={(value) => handleApply(activeField, value)}
         />
       )}

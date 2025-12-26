@@ -10,9 +10,10 @@
 6. [Data Flow](#data-flow)
 7. [Authentication Flow](#authentication-flow)
 8. [Chatbot Widget Flow](#chatbot-widget-flow)
-9. [Realtime Updates Flow](#realtime-updates-flow)
-10. [API Routes](#api-routes)
-11. [Database Schema](#database-schema)
+9. [RAG (Retrieval-Augmented Generation) Flow](#rag-retrieval-augmented-generation-flow)
+10. [Realtime Updates Flow](#realtime-updates-flow)
+11. [API Routes](#api-routes)
+12. [Database Schema](#database-schema)
 
 ---
 
@@ -64,10 +65,15 @@
 │  - api_keys                                                 │
 └─────────────────────────────────────────────────────────────┘
                           │
-                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│              Google Gemini AI (via Vercel AI SDK)           │
-└─────────────────────────────────────────────────────────────┘
+                          ├─► Upstash Search (RAG indexing)
+                          │
+                          ├─► Upstash Redis (Rate limiting)
+                          │
+                          ├─► Groq LLM (Chat responses)
+                          │   - qwen/qwen3-32b
+                          │
+                          └─► Google Gemini (Field generation)
+                              - gemini-2.5-flash
 ```
 
 ---
@@ -89,7 +95,10 @@
 - **Next.js API Routes** (serverless functions)
 - **Supabase** (PostgreSQL database + Realtime)
 - **Clerk** (authentication)
-- **Google Gemini 2.0 Flash** (AI model via Vercel AI SDK)
+- **Groq** (LLM for chat responses - `qwen/qwen3-32b`)
+- **Google Gemini 2.5 Flash** (AI field generation)
+- **Upstash Search** (RAG - Retrieval-Augmented Generation)
+- **Upstash Redis** (Rate limiting)
 
 ### Package Management
 
@@ -213,7 +222,7 @@ Chatbot Component Mounts
 └─────────────────────────────────────┘
 ```
 
-### 4. Chat Message Flow
+### 4. Chat Message Flow (with RAG)
 
 ```
 User sends message
@@ -229,27 +238,33 @@ User sends message
     ▼
 ┌─────────────────────────────────────┐
 │  POST /api/chat/[bot_id]            │
-│  1. Validates bot_id                │
-│  2. Parses request (JSON/FormData)   │
-│  3. Authenticates (API key or none)  │
-│  4. Loads bot profile               │
-│  5. Builds system prompt            │
-│  6. Streams response from Gemini    │
+│  1. Validates bot_id & session       │
+│  2. Rate limiting check             │
+│  3. Parses request (JSON/FormData)   │
+│  4. Authenticates (API key or none)  │
+│  5. Loads bot profile               │
+│  6. RAG: Upstash Search query        │
+│     - Searches bot config context    │
+│     - Retrieves relevant snippets     │
+│  7. Builds system prompt + RAG ctx   │
+│  8. Calls Groq LLM (qwen/qwen3-32b) │
+│  9. Returns JSON response            │
 └─────────────────────────────────────┘
     │
     ▼
 ┌─────────────────────────────────────┐
-│  Google Gemini AI                   │
-│  - Processes message                │
-│  - Generates response               │
-│  - Streams back to client           │
+│  Groq LLM                           │
+│  - Processes message + context      │
+│  - Generates JSON response          │
+│  - Returns {answer, suggestedQuestions}│
 └─────────────────────────────────────┘
     │
     ▼
 ┌─────────────────────────────────────┐
-│  ChatInterface displays stream       │
-│  - Updates message in real-time      │
+│  ChatInterface displays response     │
+│  - Updates message                   │
 │  - Renders markdown                  │
+│  - Shows suggested questions         │
 └─────────────────────────────────────┘
 ```
 
@@ -452,22 +467,26 @@ React Components (camelCase)
 The widget can be integrated via three methods:
 
 1. **Script Tag Auto-Mount**:
+
    ```html
    <script src="CDN_URL" data-bot-id="BOT_ID" defer></script>
    ```
+
    - Automatically creates `<quick-bot>` element
    - API base URL is hardcoded (no need to specify)
 
 2. **Custom Element**:
+
    ```html
    <quick-bot bot-id="BOT_ID"></quick-bot>
    ```
+
    - Manual placement
    - Requires script to be loaded first
 
 3. **JavaScript API**:
    ```javascript
-   window.QuickBot.init({ botId: 'BOT_ID' });
+   window.QuickBot.init({ botId: "BOT_ID" });
    ```
    - Programmatic initialization
    - Can specify custom container
@@ -534,6 +553,84 @@ The widget can be integrated via three methods:
 - **Dark mode**: Automatically detects `class="dark"` on `<html>` element
 
 ---
+
+## 🔍 RAG (Retrieval-Augmented Generation) Flow
+
+### Configuration Ingestion
+
+```
+User saves bot configuration
+    │
+    ▼
+┌─────────────────────────────────────┐
+│  Config Form / Settings Form        │
+│  - Updates Supabase (bot_configs)   │
+└─────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────┐
+│  POST /api/vector/ingest             │
+│  - Triggers ingestion (non-blocking)│
+└─────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────┐
+│  ingestBotContent(botId)            │
+│  1. Fetches persona & botthesis     │
+│  2. Upserts to Upstash Search       │
+│     - ID: bot:{botId}:persona        │
+│     - ID: bot:{botId}:botthesis     │
+│     - Metadata: {botId, field}      │
+└─────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────┐
+│  Upstash Search Index               │
+│  - Index: "bot-configs"             │
+│  - Stores config text for retrieval │
+└─────────────────────────────────────┘
+```
+
+### RAG Retrieval During Chat
+
+```
+User sends chat message
+    │
+    ▼
+┌─────────────────────────────────────┐
+│  POST /api/chat/[bot_id]            │
+│  - retrieveContext(botId, message) │
+└─────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────┐
+│  Upstash Search Query               │
+│  - Searches "bot-configs" index     │
+│  - Filters by metadata.botId        │
+│  - Returns top 3 results             │
+└─────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────┐
+│  System Prompt Builder               │
+│  - Injects RAG context              │
+│  - Format: "CONTEXT START / END"    │
+└─────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────┐
+│  Groq LLM                           │
+│  - Uses context for better answers  │
+└─────────────────────────────────────┘
+```
+
+**Key Points**:
+
+- **Non-blocking**: Ingestion failures don't break config saves
+- **Idempotent**: Safe to re-ingest (upsert by ID)
+- **Scoped**: Each bot has isolated search results
+- **Optional**: If Upstash Search is not configured, chat works without RAG
+- **Fallback**: If no RAG results, LLM proceeds with base prompt
 
 ## 🔄 Realtime Updates Flow
 
@@ -608,16 +705,19 @@ The widget can be integrated via three methods:
 
 ### POST `/api/chat/[bot_id]`
 
-**Purpose**: Handles chat messages and streams AI responses
+**Purpose**: Handles chat messages and returns AI responses with RAG
 
 **Flow**:
 
-1. Validates `bot_id` and message
-2. Supports JSON or FormData (for files)
-3. Authenticates (API key or none for widget)
-4. Loads bot profile
-5. Builds system prompt from config
-6. Streams response from Google Gemini
+1. Validates `bot_id`, session ID, and message
+2. Rate limiting (20 requests/minute per session)
+3. Supports JSON or FormData (for files)
+4. Authenticates (API key or none for widget)
+5. Loads bot profile
+6. **RAG**: Queries Upstash Search for relevant bot config context
+7. Builds system prompt with RAG context (if available)
+8. Calls Groq LLM (`qwen/qwen3-32b`) with JSON response format
+9. Returns structured JSON: `{answer, suggestedQuestions}`
 
 **Authentication**:
 
@@ -626,9 +726,32 @@ The widget can be integrated via three methods:
 
 **Features**:
 
-- File upload support (images, PDFs, etc.)
-- Streaming responses
-- Multi-modal (text + images)
+- **RAG (Retrieval-Augmented Generation)**: Context-aware responses using bot config
+- **Rate limiting**: 20 requests/minute per session
+- **Short-circuit optimization**: Skips LLM for obvious out-of-scope messages
+- **JSON response format**: Structured answers with suggested questions
+- **Token limit**: 512 tokens max per response
+- **Fallback handling**: Returns bot's fallback message on errors
+
+### POST `/api/generate-field`
+
+**Purpose**: Generates bot configuration fields using AI
+
+**Flow**:
+
+1. Validates bot ID and field type
+2. Rate limiting (10 requests/minute per bot)
+3. Loads bot settings for context
+4. Calls Google Gemini (`gemini-2.5-flash`) with field-specific prompt
+5. Returns generated content
+
+**Features**:
+
+- **AI-powered generation**: Creates persona, botthesis, greetings, etc.
+- **Context-aware**: Uses existing bot settings as context
+- **Rate limited**: 10 requests/minute per bot
+- **Token limit**: 2000 tokens max per generation
+- **Field-specific prompts**: Optimized prompts for each field type
 
 ---
 
@@ -640,7 +763,9 @@ quick-bot-ai/
 │   ├── app/                    # Next.js App Router
 │   │   ├── api/               # API routes
 │   │   │   ├── config/        # Config endpoint
-│   │   │   └── chat/          # Chat endpoint
+│   │   │   ├── chat/          # Chat endpoint (with RAG)
+│   │   │   ├── generate-field/# AI field generation
+│   │   │   └── vector/        # Search ingestion trigger
 │   │   ├── bots/              # Bot management pages
 │   │   │   └── [slug]/        # Individual bot routes
 │   │   └── layout.tsx          # Root layout
@@ -655,6 +780,11 @@ quick-bot-ai/
 │   │   ├── client/            # Client-side actions
 │   │   ├── db/                # Database helpers
 │   │   ├── supabase/          # Supabase config
+│   │   ├── upstash/           # Upstash services
+│   │   │   ├── search/        # Upstash Search (RAG)
+│   │   │   └── rate-limit/    # Rate limiting
+│   │   ├── llm/               # LLM utilities
+│   │   │   └── system-prompt-builder.ts
 │   │   └── ...
 │   ├── providers/             # Context providers
 │   │   └── SupabaseProvider.tsx
@@ -695,14 +825,30 @@ SUPABASE_SERVICE_ROLE_KEY=
 QUICKBOT_PRIVATE_KEY_RAW=
 NEXT_PUBLIC_QUICKBOT_PUBLIC_KEY=
 
-# Google AI
-GOOGLE_GENERATIVE_AI_API_KEY=
+# Groq (LLM for chat)
+GROQ_API_KEY=
+
+# Google Gemini (AI field generation)
+GEMINI_API_KEY=
+
+# Upstash Search (RAG)
+UPSTASH_SEARCH_REST_URL=
+UPSTASH_SEARCH_REST_TOKEN=
+
+# Upstash Redis (Rate limiting)
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
 
 # CDN (Production)
 CDN_URL=https://quickbot-ai.smit090305.workers.dev/v1/quickbot.iife.js
 ```
 
 **Note**: The widget's API base URL is hardcoded in `quickbot/src/index.ts` as `https://quickbots-ai.vercel.app`.
+
+**Optional Services**:
+
+- Upstash Search: If not configured, RAG is disabled (chat still works)
+- Upstash Redis: If not configured, rate limiting is disabled (all requests allowed)
 
 ---
 
@@ -766,13 +912,17 @@ This is a **multi-tenant SaaS platform** for AI chatbots with:
 - ✅ **User authentication** via Clerk
 - ✅ **Database** via Supabase (PostgreSQL)
 - ✅ **Realtime updates** via Supabase Realtime
-- ✅ **AI chat** via Google Gemini
+- ✅ **AI chat** via Groq (`qwen/qwen3-32b`) with RAG
+- ✅ **RAG (Retrieval-Augmented Generation)** via Upstash Search
+- ✅ **AI field generation** via Google Gemini (`gemini-2.5-flash`)
+- ✅ **Rate limiting** via Upstash Redis
 - ✅ **Embeddable widget** via Web Component (`<quick-bot>`)
 - ✅ **CDN deployment** via IIFE build
 - ✅ **Secure config** via ECDSA signatures
 - ✅ **Multi-tenant** via user_id isolation
 - ✅ **Dark mode** automatic detection
 - ✅ **Chat persistence** via sessionStorage
+- ✅ **CORS support** for cross-origin widget requests
 
 The architecture separates concerns:
 
@@ -785,16 +935,18 @@ The architecture separates concerns:
 ### Widget Integration Methods
 
 1. **Script Tag** (Auto-mount):
+
    ```html
    <script src="CDN_URL" data-bot-id="BOT_ID" defer></script>
    ```
 
 2. **Custom Element**:
+
    ```html
    <quick-bot bot-id="BOT_ID"></quick-bot>
    ```
 
 3. **JavaScript API**:
    ```javascript
-   window.QuickBot.init({ botId: 'BOT_ID' });
+   window.QuickBot.init({ botId: "BOT_ID" });
    ```

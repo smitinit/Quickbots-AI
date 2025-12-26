@@ -11,7 +11,7 @@ const redis = Redis.fromEnv();
  */
 export const chatRateLimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(20, "1 m"),
+  limiter: Ratelimit.slidingWindow(10, "1 m"),
   analytics: true, // enables dashboard graphs
   prefix: "ratelimit:chat",
 });
