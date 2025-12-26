@@ -211,10 +211,10 @@ export function TabsNavigation({
                 className={cn(
                   "px-2 sm:px-3 py-1 sm:py-0.5 text-xs sm:text-sm font-medium h-auto",
                   "transition-all duration-200",
-                  "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30",
+                  "bg-linear-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30",
                   "border-blue-200 dark:border-blue-800",
                   "text-blue-700 dark:text-blue-300",
-                  "hover:bg-gradient-to-r hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/40 dark:hover:to-indigo-900/40",
+                  "hover:bg-linear-to-r hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/40 dark:hover:to-indigo-900/40",
                   "hover:border-blue-300 dark:hover:border-blue-700",
                   "hover:shadow-sm",
                   "font-semibold whitespace-nowrap"
