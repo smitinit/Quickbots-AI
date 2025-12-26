@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import type { FieldType } from "@/types/ai.types";
 
@@ -102,9 +103,10 @@ ${ctx.userHint || "None"}
 Instruction priority rules:
 1. Content focus instructions (what to emphasize) take highest priority.
 2. Clarity and correctness override stylistic preferences.
-3. If length instructions conflict, choose the length that best preserves meaning.
+3. If length instructions conflict, choose the length that best preserves meaning (but never exceed 2000 tokens).
 4. If tone instructions conflict, choose the most professional and confident option.
 5. Never sacrifice important information to satisfy a weaker instruction.
+6. CRITICAL: Your output MUST NOT exceed 2000 tokens. Keep responses concise.
 `;
 
   const rejectionRule = `
@@ -251,6 +253,12 @@ ${rejectionRule}
 You are an AI assistant generating chatbot configuration content
 that will be used directly in a production system.
 
+CRITICAL: Your output is LIMITED to 2000 tokens maximum.
+- Keep responses concise and within the token limit
+- Prioritize essential information only
+- If your response would exceed 2000 tokens, make it shorter
+- Do not generate verbose or lengthy content
+
 Do not explain your reasoning.
 Do not include formatting or metadata.
 Follow the task exactly.
@@ -260,33 +268,43 @@ ${prompts[field]}
 }
 
 /* -------------------------------------------------
-   Ollama Generator
+   Gemini Generator
 ------------------------------------------------- */
 
-async function generateWithOllama(
+/**
+ * Generates content using Google Gemini
+ * @param prompt - The prompt to send to Gemini
+ * @param temperature - Temperature setting (0.0-2.0)
+ * @returns Generated text content
+ */
+async function generateWithGemini(
   prompt: string,
   temperature: number
 ): Promise<string> {
-  const apiModelUrl = process.env.API_MODEL_URL 
-  const res = await fetch(`${apiModelUrl}/api/generate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "llama3.1:8b",
-      prompt,
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY not configured");
+  }
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash", // Fast and efficient for content generation
+    generationConfig: {
       temperature,
-      stream: false,
-      options: {
-        num_predict: 220,
-        top_p: 0.9,
-        repeat_penalty: 1.1,
-      },
-    }),
+      maxOutputTokens: 2000, // Limit output length
+      topP: 0.9,
+    },
   });
 
-  if (!res.ok) throw new Error("Ollama generation failed");
-  const json = await res.json();
-  return (json.response ?? "").trim();
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    return text.trim();
+  } catch (err) {
+    console.error("[Gemini] Generation failed:", err);
+    throw new Error("Gemini generation failed");
+  }
 }
 
 /* -------------------------------------------------
@@ -340,7 +358,7 @@ export async function POST(req: NextRequest) {
       currentValue,
     });
 
-    const output = await generateWithOllama(
+    const output = await generateWithGemini(
       prompt,
       FIELD_TEMPERATURE[allowedField]
     );

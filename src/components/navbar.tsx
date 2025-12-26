@@ -26,15 +26,12 @@ export default function Navbar() {
       <div className="container mx-auto px-3 sm:px-4 md:px-6">
         <div className="flex h-14 sm:h-16 items-center justify-between">
           {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center z-10 group relative"
-          >
+          <Link href="/" className="flex items-center z-10 group relative">
             <h1 className="font-getvoip text-sm sm:text-base md:text-lg font-bold text-foreground tracking-wide relative">
               <span className="absolute -top-2 sm:-top-3 -right-8 sm:-right-10 bg-primary text-primary-foreground text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.5 leading-tight rounded-md shadow-md uppercase tracking-wider">
                 BETA
               </span>
-              <span className="hidden sm:inline">QUICKBOTS AI</span>
+              <span className="hidden sm:inline">QUICKBOTS</span>
               <span className="sm:hidden">QUICKBOTS</span>
             </h1>
           </Link>

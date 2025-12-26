@@ -1,4 +1,4 @@
-# Quick Bot AI - Complete Project Flow & Architecture
+# Quickbots - Complete Project Flow & Architecture
 
 ## 📋 Table of Contents
 
@@ -18,7 +18,7 @@
 
 ## 🎯 Project Overview
 
-**Quick Bot AI** is a multi-tenant SaaS platform for creating, configuring, and managing AI-powered chatbots. The platform allows users to:
+**Quickbots** is a multi-tenant SaaS platform for creating, configuring, and managing AI-powered chatbots. The platform allows users to:
 
 - Create and customize chatbots with unique personalities
 - Configure UI settings (themes, colors, behavior)
@@ -157,7 +157,7 @@ User clicks on a bot
 │  - Configure                       │
 │  - Settings                        │
 │  - Advance                         │
-│  - QuickBots API                  │
+│  - Quickbots API                  │
 │  - Danger Zone                     │
 └─────────────────────────────────────┘
 ```

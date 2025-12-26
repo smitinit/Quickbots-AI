@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy · QuickBots",
+  title: "Privacy Policy · Quickbots",
   description:
-    "Learn how QuickBots collects, uses, and safeguards your data across the platform.",
+    "Learn how Quickbots collects, uses, and safeguards your data across the platform.",
 };
 
 const sections = [
@@ -53,11 +53,11 @@ export default function PrivacyPage() {
             Privacy Policy
           </p>
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-            Protecting Your Data at QuickBots
+            Protecting Your Data at Quickbots
           </h1>
           <p className="text-muted-foreground text-base md:text-lg leading-relaxed">
             This policy explains what data we collect, why we collect it, and
-            the controls you have while building with QuickBots. It applies to
+            the controls you have while building with Quickbots. It applies to
             the dashboard, public APIs, and any hosted chatbot widgets.
           </p>
         </header>

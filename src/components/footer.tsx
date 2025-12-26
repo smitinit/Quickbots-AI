@@ -33,8 +33,8 @@ interface FooterProps {
 const Footer = ({
   logo = {
     url: "/",
-    title: "QuickBots",
-    alt: "QuickBots AI Bot Platform",
+    title: "Quickbots",
+    alt: "Quickbots Bot Platform",
   },
   tagline = "Create intelligent AI bots with ease. No coding required.",
   menuItems = [
@@ -43,7 +43,7 @@ const Footer = ({
       links: [
         { text: "AI-assisted onboarding", url: undefined },
         { text: "Runtime controls & quotas", url: undefined },
-        { text: "Embeddable QuickBots widget", url: undefined },
+        { text: "Embeddable Quickbots widget", url: undefined },
         { text: "Analytics & guardrails", url: undefined },
         { text: "Developer-friendly APIs", url: undefined },
       ],
@@ -73,7 +73,7 @@ const Footer = ({
                   <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center overflow-hidden">
                     <Image
                       src={quickbotsIcon}
-                      alt="QuickBots logo"
+                      alt="Quickbots logo"
                       className="h-5 w-5"
                       width={32}
                       height={32}

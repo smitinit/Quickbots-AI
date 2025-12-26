@@ -74,6 +74,17 @@ export function useConfigActions() {
         .eq("bot_id", botId);
     }
 
+    // Trigger search ingestion (non-blocking, best-effort)
+    // Fire and forget - failures don't affect the response
+    fetch("/api/vector/ingest", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ botId }),
+    }).catch((err) => {
+      // Silently handle errors - this is best-effort
+      console.error("[Search Ingestion] Background trigger failed:", err);
+    });
+
     return { ok: true, data: data };
   };
 

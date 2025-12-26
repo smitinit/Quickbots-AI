@@ -101,7 +101,7 @@ export default function DangerSectionPage() {
               <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                 Currently bots are locked as active and cannot be changed. You
                 can change the status to inactive in future version of
-                QuickBots.
+                Quickbots.
               </p>
             </div>
           </div>

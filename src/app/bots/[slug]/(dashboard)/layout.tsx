@@ -12,7 +12,7 @@ interface DashboardLayoutProps {
 
 export async function generateMetadata({}: DashboardLayoutProps): Promise<Metadata> {
   return {
-    title: "Bot · QuickBots",
+    title: "Bot · Quickbots",
     description: "AI chatbot dashboard",
   };
 }

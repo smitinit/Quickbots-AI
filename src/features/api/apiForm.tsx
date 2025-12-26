@@ -105,7 +105,7 @@ export default function ApiConfig() {
 <body>
   <h1>Welcome to My Site</h1>
   
-  <!-- QuickBots Widget -->
+  <!-- Quickbots Widget -->
   <script
     src="${CDN_URL}"
     data-bot-id="${bot.bot_id}"
@@ -237,7 +237,7 @@ export class AppComponent implements OnInit, OnDestroy {
   return (
     <div className="w-full mx-auto max-w-5xl px-3 sm:px-4 md:px-6 py-6 sm:py-8 min-w-0 overflow-x-hidden">
       <div className="space-y-1 mb-6 sm:mb-8 w-full min-w-0">
-        <h1 className="text-2xl sm:text-3xl font-semibold text-primary">Embed QuickBot</h1>
+        <h1 className="text-2xl sm:text-3xl font-semibold text-primary">Embed Quickbot</h1>
         <p className="text-xs sm:text-sm text-muted-foreground">
           Integrate your chatbot into any website or application. Copy the code
           snippets below and paste them into your project.

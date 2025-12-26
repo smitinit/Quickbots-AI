@@ -33,6 +33,7 @@ interface ContextFormProps {
   context: { userHint?: string };
   onContextChange: (context: { userHint?: string }) => void;
   botContext: BotContextData | null;
+  disabled?: boolean;
 }
 
 interface ContextBadge {
@@ -45,6 +46,7 @@ export function ContextForm({
   context,
   onContextChange,
   botContext,
+  disabled = false,
 }: ContextFormProps) {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [manualText, setManualText] = useState<string>(context.userHint || "");
@@ -108,7 +110,6 @@ export function ContextForm({
     const commonOptions = [
       "Make it short",
       "Make it more precise",
-      "A bit longer",
       "Keep it friendly",
       "Keep it professional",
       "Make it concise",
@@ -280,7 +281,7 @@ export function ContextForm({
               variant="outline"
               size="sm"
               onClick={() => handleQuickClick(option)}
-              disabled={selectedOptions.includes(option)}
+              disabled={disabled || selectedOptions.includes(option)}
               className="h-8 text-xs"
             >
               {option}
@@ -300,17 +301,21 @@ export function ContextForm({
                 )}
                 <Badge
                   variant="secondary"
-                  className="px-3 py-1.5 text-xs font-normal flex items-center gap-1.5"
+                  className={`px-3 py-1.5 text-xs font-normal flex items-center gap-1.5 ${
+                    disabled ? "opacity-60" : ""
+                  }`}
                 >
                   <span>{option}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveOption(option)}
-                    className="ml-1 rounded-full hover:bg-secondary-foreground/20 p-0.5 transition-colors"
-                    aria-label={`Remove ${option}`}
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
+                  {!disabled && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveOption(option)}
+                      className="ml-1 rounded-full hover:bg-secondary-foreground/20 p-0.5 transition-colors"
+                      aria-label={`Remove ${option}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
                 </Badge>
               </div>
             ))}
@@ -328,6 +333,7 @@ export function ContextForm({
           onChange={(e) => handleInputChange(e.target.value)}
           className="min-h-[100px] resize-none"
           required={selectedOptions.length === 0 && !manualText.trim()}
+          disabled={disabled}
         />
         <p className="text-xs text-muted-foreground">
           {selectedOptions.length > 0

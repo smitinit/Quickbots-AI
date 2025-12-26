@@ -170,7 +170,7 @@ export default function DocsPage() {
         </div>
 
         {/* Desktop Sidebar Navigation - Hidden on mobile */}
-        <aside className="hidden lg:block w-64 border-r border-border bg-card/50 sticky top-0 h-screen overflow-y-auto">
+        <aside className="hidden lg:block w-64 border-r border-border bg-card/50 fixed top-16 left-0 h-[calc(100vh-4rem)] overflow-y-auto z-30">
           <div className="p-6 space-y-6">
             <div>
               <p className="text-xs text-center text-muted-foreground mt-1">
@@ -205,7 +205,7 @@ export default function DocsPage() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 w-full min-w-0 max-w-4xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-20 lg:pt-8 pb-8 sm:py-12 lg:py-12 max-w-full">
+        <main className="flex-1 w-full min-w-0 max-w-4xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-20 lg:pt-8 lg:ml-64 pb-8 sm:py-12 lg:py-12 max-w-full">
           {/* Getting Started */}
           <section
             id="getting-started"
@@ -213,20 +213,20 @@ export default function DocsPage() {
           >
             <div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-3 sm:mb-4">
-                QuickBots Documentation
+                Quickbots Documentation
               </h1>
               <p className="text-base sm:text-lg text-muted-foreground">
                 Embed intelligent chatbots into any website or application in
-                minutes. QuickBots provides a powerful, customizable chatbot
+                minutes. Quickbots provides a powerful, customizable chatbot
                 widget that works seamlessly across all frameworks.
               </p>
             </div>
 
             <Card className="w-full overflow-hidden">
               <CardHeader>
-                <CardTitle>What is QuickBots?</CardTitle>
+                <CardTitle>What is Quickbots?</CardTitle>
                 <CardDescription>
-                  QuickBots is a modern chatbot widget that can be embedded into
+                  Quickbots is a modern chatbot widget that can be embedded into
                   any website or web application. It supports dark mode, file
                   uploads, streaming responses, and much more.
                 </CardDescription>
@@ -271,7 +271,7 @@ export default function DocsPage() {
                 Installation
               </h2>
               <p className="text-muted-foreground">
-                Get started with QuickBots in seconds. Choose the method that
+                Get started with Quickbots in seconds. Choose the method that
                 works best for your project.
               </p>
             </div>
@@ -321,7 +321,7 @@ export default function DocsPage() {
                     <code className="bg-background px-1 py-0.5 rounded">
                       YOUR_BOT_ID
                     </code>{" "}
-                    with your actual bot ID from the QuickBots dashboard.
+                    with your actual bot ID from the Quickbots dashboard.
                   </p>
                 </div>
               </CardContent>
@@ -403,7 +403,7 @@ export default function DocsPage() {
                 Framework Guides
               </h2>
               <p className="text-muted-foreground">
-                Step-by-step instructions for integrating QuickBots into your
+                Step-by-step instructions for integrating Quickbots into your
                 favorite framework.
               </p>
             </div>
@@ -467,7 +467,7 @@ export default function DocsPage() {
 <body>
   <h1>Welcome to My Site</h1>
   
-  <!-- QuickBots Widget -->
+  <!-- Quickbots Widget -->
   <script
     src="${CDN_URL}"
     data-bot-id="YOUR_BOT_ID"
@@ -503,7 +503,7 @@ export default function DocsPage() {
                   <CardHeader>
                     <CardTitle>React</CardTitle>
                     <CardDescription>
-                      Integrate QuickBots into your React application.
+                      Integrate Quickbots into your React application.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4 w-full min-w-0">
@@ -516,7 +516,7 @@ export default function DocsPage() {
 
 function App() {
   useEffect(() => {
-    // Load QuickBots script
+    // Load Quickbots script
     const script = document.createElement('script');
     script.src = '${CDN_URL}';
     script.setAttribute('data-bot-id', 'YOUR_BOT_ID');
@@ -551,7 +551,7 @@ export default App;`}
 
 function App() {
   useEffect(() => {
-    // Load QuickBots script
+    // Load Quickbots script
     const script = document.createElement('script');
     script.src = '${CDN_URL}';
     script.defer = true;
@@ -591,7 +591,7 @@ function App() {
                   <CardHeader>
                     <CardTitle>Next.js</CardTitle>
                     <CardDescription>
-                      Add QuickBots to your Next.js application.
+                      Add Quickbots to your Next.js application.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4 w-full min-w-0">
@@ -682,7 +682,7 @@ export function QuickBotWidget({ botId }: { botId: string }) {
                   <CardHeader>
                     <CardTitle>Vue.js</CardTitle>
                     <CardDescription>
-                      Integrate QuickBots into your Vue application.
+                      Integrate Quickbots into your Vue application.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4 w-full min-w-0">
@@ -763,7 +763,7 @@ export default {
                   <CardHeader>
                     <CardTitle>Angular</CardTitle>
                     <CardDescription>
-                      Add QuickBots to your Angular application.
+                      Add Quickbots to your Angular application.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4 w-full min-w-0">
@@ -845,7 +845,7 @@ export class AppComponent implements OnInit, OnDestroy {
                 API Reference
               </h2>
               <p className="text-muted-foreground">
-                Programmatic control of the QuickBots widget using the
+                Programmatic control of the Quickbots widget using the
                 JavaScript API.
               </p>
             </div>
@@ -973,7 +973,7 @@ window.QuickBot.destroy('a1b2c3d4-e5f6-7890-abcd-ef1234567890');`}
               </h2>
               <p className="text-muted-foreground">
                 Customize your bot&apos;s appearance and behavior from the
-                QuickBots dashboard.
+                Quickbots dashboard.
               </p>
             </div>
 
@@ -1034,7 +1034,7 @@ window.QuickBot.destroy('a1b2c3d4-e5f6-7890-abcd-ef1234567890');`}
               <CardHeader>
                 <CardTitle>Dark Mode</CardTitle>
                 <CardDescription>
-                  QuickBots automatically detects and adapts to your
+                  Quickbots automatically detects and adapts to your
                   website&apos;s dark mode.
                 </CardDescription>
               </CardHeader>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ReactNode } from "react";
 
 export const metadata: Metadata = {
-  title: "QuickBots Dashboard",
+  title: "Quickbots Dashboard",
   description:
     "Manage all your AI-powered personalized chatbots from one dashboard.",
 };

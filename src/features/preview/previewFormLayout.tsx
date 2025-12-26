@@ -376,7 +376,7 @@ export default function PreviewLayoutForm({
   }, [lastPollTime]);
 
   return (
-    <Card className="border-none shadow-none p-0 w-full h-full flex flex-col overflow-hidden">
+    <Card className="border-none shadow-none p-4 w-full h-full flex flex-col overflow-hidden">
       <VisuallyHidden>
         <CardHeader className="text-center pb-6">
           <CardTitle className="text-2xl font-semibold">
@@ -399,10 +399,12 @@ export default function PreviewLayoutForm({
               {/* Preview Coming Soon Message */}
               <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-lg">
                 <p className="text-sm text-muted-foreground text-center">
-                  <span className="font-semibold text-primary">Live preview of your bot will be available soon.</span>
+                  <span className="font-semibold text-primary">
+                    Live preview of your bot will be available soon.
+                  </span>
                 </p>
               </div>
-              
+
               <Form {...form}>
                 <form onSubmit={onSubmit} className="space-y-6">
                   {/* Section: Bot Identity */}
@@ -765,6 +767,20 @@ export default function PreviewLayoutForm({
           isSubmitting={isSubmitting}
           isPendingUpdate={isPending}
           onSave={onSubmit}
+          onCancel={async () => {
+            // Reset form to last loaded preview data
+            const res = await getPreview(bot.bot_id!);
+            if (res.ok && res.data) {
+              const paddedQuickQuestions = [
+                ...(res.data.quickQuestions || []),
+                ...Array(5 - (res.data.quickQuestions?.length || 0)).fill(""),
+              ].slice(0, 5) as [string, string, string, string, string];
+              form.reset({
+                ...res.data,
+                quickQuestions: paddedQuickQuestions,
+              });
+            }
+          }}
           phrase="Preview Settings"
         />
       )}

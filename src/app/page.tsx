@@ -52,7 +52,7 @@ const powerFeatures: PowerFeature[] = [
     id: "feature-1",
     title: "Guided Bot Creation",
     description:
-      "Capture brand voice, product knowledge, and guardrails in minutes using QuickBots’ onboarding flow and AI-assisted config generator.",
+      "Capture brand voice, product knowledge, and guardrails in minutes using Quickbots' onboarding flow and AI-assisted config generator.",
     image: feature1,
     icon: (
       <Image
@@ -67,7 +67,7 @@ const powerFeatures: PowerFeature[] = [
   },
   {
     id: "feature-2",
-    title: "Embeddable QuickBots Widget",
+    title: "Embeddable Quickbots Widget",
     description:
       "Add a single script tag to embed a fully-featured chatbot widget. Works with any framework, automatically adapts to dark mode, and includes session history, file uploads, and seamless theming.",
     image: feature2,
@@ -88,17 +88,17 @@ const featureItems: FeatureItem[] = [
     id: 1,
     title: "AI-Assisted Onboarding",
     description:
-      "Feed QuickBots a few prompts about your product and it auto-generates persona, thesis, greetings, runtime defaults, and UI settings that can be edited before publishing.",
+      "Feed Quickbots a few prompts about your product and it auto-generates persona, thesis, greetings, runtime defaults, and UI settings that can be edited before publishing.",
   },
   {
     id: 2,
     title: "Bring Your Own Stack",
     description:
-      "Use Supabase Auth + Postgres, plug in your preferred LLM provider, and access everything via RESTful APIs so QuickBots layers onto existing infrastructure instead of replacing it.",
+      "Use Supabase Auth + Postgres, plug in your preferred LLM provider, and access everything via RESTful APIs so Quickbots layers onto existing infrastructure instead of replacing it.",
   },
   {
     id: 3,
-    title: "QuickBots Runtime Controls",
+    title: "Quickbots Runtime Controls",
     description:
       "Ship safe updates with rate limits, token quotas, and environment-specific configs. Pause traffic instantly or switch models without redeploying your site.",
   },
@@ -106,7 +106,7 @@ const featureItems: FeatureItem[] = [
     id: 4,
     title: "Universal Web Component Widget",
     description:
-      "Embed the QuickBots widget with a single script tag. Works with HTML, React, Next.js, Vue, Angular, or any framework. Automatically detects dark mode and provides a seamless chat experience with auto-scroll and session persistence.",
+      "Embed the Quickbots widget with a single script tag. Works with HTML, React, Next.js, Vue, Angular, or any framework. Automatically detects dark mode and provides a seamless chat experience with auto-scroll and session persistence.",
   },
   {
     id: 5,
@@ -162,7 +162,7 @@ const Hero = memo(function Hero() {
               >
                 <Image
                   src={quickbotsIcon}
-                  alt="QuickBots"
+                  alt="Quickbots"
                   className="h-full w-full object-contain drop-shadow-lg"
                   width={112}
                   height={112}
@@ -174,7 +174,7 @@ const Hero = memo(function Hero() {
             <div className="text-center space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6 xl:space-y-8">
               <div className="mx-auto max-w-5xl text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold leading-tight tracking-tight text-primary px-2 sm:px-0">
                 <SplitText
-                  text="Launch customer-ready AI chatbots faster with QuickBots"
+                  text="Launch customer-ready AI chatbots faster with Quickbots"
                   className="inline-block text-inherit"
                   delay={120}
                   duration={0.2}
@@ -190,7 +190,7 @@ const Hero = memo(function Hero() {
               </div>
               <p className="mx-auto max-w-3xl text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-muted-foreground leading-relaxed">
                 Onboard teams with AI-assist, manage runtime limits, and embed
-                QuickBots widgets with a single script tag—works with any framework.
+                Quickbots widgets with a single script tag—works with any framework.
               </p>
 
               <p className="mx-auto max-w-4xl text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-muted-foreground leading-relaxed">
@@ -232,7 +232,7 @@ const Hero = memo(function Hero() {
             <div className="relative overflow-hidden rounded-lg sm:rounded-xl md:rounded-2xl lg:rounded-2xl xl:rounded-3xl">
               <Image
                 src={theme === "dark" ? dashboardimage : dashboardimagewhite}
-                alt="QuickBots AI Bot Dashboard Preview"
+                alt="Quickbots Bot Dashboard Preview"
                 className="relative z-10 w-full object-cover border-4 border-border/20 shadow-lg sm:shadow-xl md:shadow-2xl lg:shadow-2xl xl:shadow-2xl transition-transform duration-500 group-hover:scale-105"
                 style={{
                   maskImage:

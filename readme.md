@@ -1,6 +1,6 @@
-# QuickBots AI
+# Quickbots
 
-**QuickBots AI** is a multi-tenant SaaS platform for creating, configuring, and managing AI-powered chatbots. This project is currently in **beta**.
+**Quickbots** is a multi-tenant SaaS platform for creating, configuring, and managing AI-powered chatbots. This project is currently in **beta**.
 
 ## 🚀 Features
 

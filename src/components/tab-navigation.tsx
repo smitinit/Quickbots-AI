@@ -30,16 +30,16 @@ const routes = ["configure", "settings", "advance", "api-connect", "danger"];
 
 const routeLabels: Record<string, string> = {
   configure: "Configure",
-  "api-connect": "Api / Connect",
   settings: "Settings",
+  "api-connect": "Api / Connect",
   advance: "Advance Settings",
   danger: "Danger Zone",
 };
 
 // Routes to show on screen
-const visibleRoutes = ["configure", "api-connect"];
+const visibleRoutes = ["configure", "settings"];
 // Routes to put in dropdown
-const dropdownRoutes = ["settings", "advance", "danger"];
+const dropdownRoutes = ["api-connect", "advance", "danger"];
 
 interface TabsNavigationProps {
   slug: string;

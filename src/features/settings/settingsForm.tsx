@@ -213,8 +213,27 @@ export default function BotSettingsForm() {
                       <Textarea
                         placeholder="Describe your business and what it does..."
                         className="min-h-[100px] bg-background border-border focus:border-primary focus:ring-1 focus:ring-primary resize-none"
-                        {...field}
                         value={field.value ?? ""}
+                        onChange={(e) => {
+                          const newValue = e.target.value;
+                          const trimmed = newValue.trim();
+                          const currentTrimmed = (field.value || "").trim();
+                          
+                          // If trimmed values are the same, set to trimmed immediately to prevent isDirty
+                          if (trimmed === currentTrimmed && newValue !== field.value) {
+                            field.onChange(trimmed);
+                          } else {
+                            field.onChange(newValue);
+                          }
+                        }}
+                        onBlur={(e) => {
+                          // Trim on blur to clean up trailing whitespace
+                          const trimmed = e.target.value.trim();
+                          if (trimmed !== e.target.value) {
+                            field.onChange(trimmed);
+                          }
+                          field.onBlur();
+                        }}
                       />
                     </FormControl>
                     <FormDescription className="text-xs text-muted-foreground">
@@ -273,8 +292,27 @@ export default function BotSettingsForm() {
                       <Textarea
                         placeholder="Describe your product features and benefits..."
                         className="min-h-[100px] bg-background border-border focus:border-primary focus:ring-1 focus:ring-primary resize-none"
-                        {...field}
                         value={field.value ?? ""}
+                        onChange={(e) => {
+                          const newValue = e.target.value;
+                          const trimmed = newValue.trim();
+                          const currentTrimmed = (field.value || "").trim();
+                          
+                          // If trimmed values are the same, set to trimmed immediately to prevent isDirty
+                          if (trimmed === currentTrimmed && newValue !== field.value) {
+                            field.onChange(trimmed);
+                          } else {
+                            field.onChange(newValue);
+                          }
+                        }}
+                        onBlur={(e) => {
+                          // Trim on blur to clean up trailing whitespace
+                          const trimmed = e.target.value.trim();
+                          if (trimmed !== e.target.value) {
+                            field.onChange(trimmed);
+                          }
+                          field.onBlur();
+                        }}
                       />
                     </FormControl>
                     <FormDescription className="text-xs text-muted-foreground">
@@ -385,6 +423,15 @@ export default function BotSettingsForm() {
         isSubmitting={isSubmitting}
         isPendingUpdate={isPendingUpdate}
         onSave={() => form.handleSubmit(onSubmit)()}
+        onCancel={() => {
+          // Reset form to original values to discard changes
+          if (settings) {
+            form.reset({
+              ...settings,
+              supported_languages: ["en"],
+            });
+          }
+        }}
         phrase="Runtime Settings"
       />
 

@@ -20,27 +20,27 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "QuickBots · AI Chatbots",
-    template: "%s · QuickBots",
+    default: "Quickbots · AI Chatbots",
+    template: "%s · Quickbots",
   },
   description:
-    "QuickBots is a personalized multi-tenant powerhouse for AI-driven chatbots.",
+    "Quickbots is a personalized multi-tenant powerhouse for AI-driven chatbots.",
   icons: { icon: "/favicon.ico" },
   // themeColor: "#ffffff",
   // viewport: "width=device-width, initial-scale=1",
   openGraph: {
-    title: "QuickBots · AI Chatbots",
+    title: "Quickbots · AI Chatbots",
     description:
       "Create, configure and manage AI-powered chatbots in one place.",
     // url: "https://quickbots.ai",
-    siteName: "QuickBots",
-    // images: [{ url: "/og.png", width: 1200, height: 630, alt: "QuickBots" }],
+    siteName: "Quickbots",
+    // images: [{ url: "/og.png", width: 1200, height: 630, alt: "Quickbots" }],
     type: "website",
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "QuickBots · AI Chatbots",
+    title: "Quickbots · AI Chatbots",
     description:
       "Create, configure and manage AI-powered chatbots in one place.",
     // images: ["/og.png"],

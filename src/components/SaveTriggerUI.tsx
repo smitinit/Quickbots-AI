@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Check } from "lucide-react";
-import { useEffect, useState, startTransition } from "react";
+import React, { useEffect, useState, startTransition, useRef } from "react";
 import { Spinner } from "./ui/spinner";
 
 interface SaveTriggerUIProps {
@@ -10,7 +10,9 @@ interface SaveTriggerUIProps {
   isSubmitting: boolean;
   isPendingUpdate: boolean;
   onSave: () => void;
+  onCancel?: () => void;
   phrase?: string;
+  justSaved?: boolean; // Track if a save just completed
 }
 
 export default function SaveTriggerUI({
@@ -18,12 +20,32 @@ export default function SaveTriggerUI({
   isSubmitting,
   isPendingUpdate,
   onSave,
+  onCancel,
   phrase = "",
+  justSaved = false,
 }: SaveTriggerUIProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const prevIsDirtyRef = useRef(isDirty);
+  const prevIsSubmittingRef = useRef(isSubmitting);
+  const prevIsPendingUpdateRef = useRef(isPendingUpdate);
+  const wasSubmittingRef = useRef(false); // Track if we were submitting recently
 
   useEffect(() => {
+    // Track previous states
+    const wasDirty = prevIsDirtyRef.current;
+    const wasSubmitting = prevIsSubmittingRef.current;
+    const wasPendingUpdate = prevIsPendingUpdateRef.current;
+
+    // Track if we're currently in a save operation
+    if (isSubmitting || isPendingUpdate) {
+      wasSubmittingRef.current = true;
+    }
+
+    prevIsDirtyRef.current = isDirty;
+    prevIsSubmittingRef.current = isSubmitting;
+    prevIsPendingUpdateRef.current = isPendingUpdate;
+
     if (isDirty) {
       startTransition(() => {
         setIsVisible(true);
@@ -32,37 +54,59 @@ export default function SaveTriggerUI({
       return;
     }
 
+    // If not dirty and was visible
     if (!isDirty && isVisible && !isSubmitting && !isPendingUpdate) {
-      startTransition(() => {
-        setShowSuccess(true);
-      });
+      // Check if we just completed a save operation
+      // This happens when:
+      // 1. We were submitting/pending and now we're not (save completed), OR
+      // 2. justSaved prop is true (explicit save signal), OR
+      // 3. We transitioned from dirty+submitting to clean (save completed)
+      const justCompletedSave =
+        wasSubmittingRef.current ||
+        justSaved ||
+        (wasDirty && (wasSubmitting || wasPendingUpdate));
 
-      // Let success state be visible for a while
-      const successTimer = setTimeout(() => {
-        // Trigger exit animation only
+      if (justCompletedSave) {
+        // Show success message after actual save
+        wasSubmittingRef.current = false; // Reset flag
         startTransition(() => {
-          setIsVisible(false);
+          setShowSuccess(true);
         });
 
-        // Reset internal state AFTER animation finishes
-        const cleanupTimer = setTimeout(() => {
+        // Let success state be visible for a while
+        const successTimer = setTimeout(() => {
+          // Trigger exit animation only
           startTransition(() => {
-            setShowSuccess(false);
+            setIsVisible(false);
           });
-        }, 300); // Wait for CSS transition to complete
 
-        return () => clearTimeout(cleanupTimer);
-      }, 2000);
+          // Reset internal state AFTER animation finishes
+          const cleanupTimer = setTimeout(() => {
+            startTransition(() => {
+              setShowSuccess(false);
+            });
+          }, 300); // Wait for CSS transition to complete
 
-      return () => clearTimeout(successTimer);
+          return () => clearTimeout(cleanupTimer);
+        }, 2000);
+
+        return () => clearTimeout(successTimer);
+      } else {
+        // Changes were reverted without saving - hide immediately
+        wasSubmittingRef.current = false; // Reset flag
+        startTransition(() => {
+          setIsVisible(false);
+          setShowSuccess(false);
+        });
+      }
     }
-  }, [isDirty, isVisible, isSubmitting, isPendingUpdate]);
+  }, [isDirty, isVisible, isSubmitting, isPendingUpdate, justSaved]);
 
   const isLoading = isSubmitting || isPendingUpdate;
 
   return (
     <div
-      className={`fixed bottom-4 sm:bottom-6 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-50 transition-all duration-300 ease-out ${
+      className={`fixed bottom-4 sm:bottom-6 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-999999999999999 transition-all duration-300 ease-out ${
         isVisible
           ? "translate-y-0 opacity-100 scale-100"
           : "translate-y-4 opacity-0 scale-95 pointer-events-none"
@@ -112,6 +156,17 @@ export default function SaveTriggerUI({
             {/* Right side - Action buttons */}
             {!showSuccess && (
               <div className="flex items-center gap-2 shrink-0">
+                {onCancel && (
+                  <Button
+                    onClick={onCancel}
+                    disabled={isLoading}
+                    size="sm"
+                    variant="outline"
+                    className="gap-1.5 sm:gap-2 px-3 sm:px-4 h-8 sm:h-9 font-medium text-xs sm:text-sm"
+                  >
+                    Cancel
+                  </Button>
+                )}
                 <Button
                   onClick={onSave}
                   disabled={isLoading}
