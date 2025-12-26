@@ -12,8 +12,10 @@ export const runtime = "nodejs";
 function corsHeaders() {
   return {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Headers":
+      "Content-Type, Authorization, X-Session-Id, X-Requested-With",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Max-Age": "86400",
   };
 }
 
@@ -43,7 +45,17 @@ export async function GET(
 ) {
   try {
     const { bot_id } = await params;
-    const { bot_id: validatedBotId } = BotIdSchema.parse({ bot_id });
+
+    // Validate bot_id
+    const validationResult = BotIdSchema.safeParse({ bot_id });
+    if (!validationResult.success) {
+      return new NextResponse(JSON.stringify({ error: "Invalid bot ID" }), {
+        status: 400,
+        headers: corsHeaders(),
+      });
+    }
+
+    const { bot_id: validatedBotId } = validationResult.data;
 
     const PRIVATE_KEY_RAW = process.env.QUICKBOT_PRIVATE_KEY_RAW;
     if (!PRIVATE_KEY_RAW) {

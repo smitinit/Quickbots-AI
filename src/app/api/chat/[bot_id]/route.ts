@@ -118,6 +118,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers":
     "Content-Type, Authorization, X-Session-Id, X-Requested-With",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Max-Age": "86400",
 };
 
 /**
@@ -212,7 +213,18 @@ export async function POST(
 
   try {
     // Validate URL parameters
-    const { bot_id } = ParamsSchema.parse(await params);
+    const paramsData = await params;
+    const paramsValidation = ParamsSchema.safeParse(paramsData);
+
+    if (!paramsValidation.success) {
+      console.error("[ERROR] Invalid bot_id parameter");
+      return NextResponse.json(
+        { error: "Invalid bot ID" },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    const { bot_id } = paramsValidation.data;
     console.log(`Bot ID: ${bot_id}`);
 
     // Validate session ID header (required for chat logging and tracking)
